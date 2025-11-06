@@ -265,15 +265,15 @@
         </div>
         
         <nav role="navigation">
-            <a href="aplikasi.html" data-target="aplikasi-frame" aria-label="Home">
+            <a href="https://zeroexec.github.io/mytools/aplikasi" data-target="aplikasi-frame" aria-label="Home">
                 <i class="fa-solid fa-house"></i>
                 <span>Home</span>
             </a>
-            <a href="v-drive.html" data-target="v-drive-frame" aria-label="V-Drive">
+            <a href="https://zeroexec.github.io/mytools/v-drive" data-target="v-drive-frame" aria-label="V-Drive">
                 <i class="fa-solid fa-hard-drive"></i>
                 <span>V-Drive</span>
             </a>
-            <a href="codingin.html" data-target="codingin-frame" aria-label="Terminal">
+            <a href="https://zeroexec.github.io/mytools/codingin" data-target="codingin-frame" aria-label="Terminal">
                 <i class="fa-solid fa-terminal"></i>
                 <span>Terminal</span>
             </a>
@@ -287,9 +287,9 @@
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <div id="mainContentContainer">
-        <iframe id="aplikasi-frame" src="aplikasi.html" title="Halaman Utama"></iframe>
-        <iframe id="v-drive-frame" src="v-drive.html" title="Penyimpanan Virtual"></iframe>
-        <iframe id="codingin-frame" src="codingin.html" title="Terminal Simulasi"></iframe>
+        <iframe id="aplikasi-frame" src="https://zeroexec.github.io/mytools/aplikasi" title="Halaman Utama"></iframe>
+        <iframe id="v-drive-frame" src="https://zeroexec.github.io/mytools/v-drive" title="Penyimpanan Virtual"></iframe>
+        <iframe id="codingin-frame" src="https://zeroexec.github.io/mytools/codingin" title="Terminal Simulasi"></iframe>
     </div>
 
     <script>
@@ -336,7 +336,8 @@
             link.addEventListener('click', e => {
                 e.preventDefault();
                 const target = link.dataset.target;
-                setActiveState(target);
+                const newUrl = link.getAttribute('href'); 
+                setActiveState(target, newUrl);
                 
                 closeSidebar();
             });
@@ -344,15 +345,13 @@
 
         // --- LOGIKA NAVIGASI ---
 
-        const setActiveState = (targetId) => {
+        const setActiveState = (targetId, newUrl) => {
             links.forEach(l => {
                 l.classList.remove('active');
                 l.removeAttribute('aria-current');
                 if (l.dataset.target === targetId) {
                     l.classList.add('active');
                     l.setAttribute('aria-current', 'page');
-                    const newUrl = l.getAttribute('href');
-                    history.replaceState(null, '', newUrl);
                 }
             });
             
@@ -360,6 +359,16 @@
             const activeFrame = document.getElementById(targetId);
             if (activeFrame) {
                 activeFrame.classList.add('active');
+                
+                // Setel src iframe ke URL penuh
+                if (activeFrame.src !== newUrl) {
+                    activeFrame.src = newUrl;
+                }
+                
+                // Update history URL browser utama.
+                if (newUrl) {
+                    history.replaceState(null, '', newUrl);
+                }
             }
             
             sessionStorage.setItem(ACTIVE_KEY, targetId);
@@ -370,11 +379,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const saved = sessionStorage.getItem(ACTIVE_KEY);
             let initialTarget = DEFAULT_PAGE;
-            const currentPath = window.location.pathname.split('/').pop(); 
             
+            // Cek URL saat ini di address bar
+            const currentUrl = window.location.href;
             let pathTarget = null;
+
             links.forEach(l => {
-                if (l.getAttribute('href') === currentPath) {
+                const linkHref = l.getAttribute('href');
+                // Cek apakah URL yang tersimpan cocok dengan salah satu link navigasi
+                if (currentUrl === linkHref) {
                     pathTarget = l.dataset.target;
                 }
             });
@@ -384,8 +397,11 @@
             } else if (saved && document.getElementById(saved)) {
                 initialTarget = saved;
             }
+
+            // Dapatkan URL dari link navigasi yang sesuai dengan target awal
+            let initialUrl = document.querySelector(`[data-target="${initialTarget}"]`).getAttribute('href');
             
-            setActiveState(initialTarget);
+            setActiveState(initialTarget, initialUrl);
             
             closeSidebar();
         });
