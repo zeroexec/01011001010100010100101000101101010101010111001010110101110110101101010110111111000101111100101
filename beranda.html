@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adlan M.R - Portofolio (Gaya Edge-Drag Enhanced V2 - Black-Cyan Final)</title>
+    <link rel="icon" href="1.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Variabel Warna dan Font yang Ditingkatkan (Black-Cyan) */
+        :root {
+            --sidebar-width: 280px;
+            --sidebar-border-width: 3px; /* Variabel baru untuk lebar garis */
+            --touch-area: 12px;
+            /* HITAM PEKAT */
+            --primary-bg: #000000; 
+            /* HAMPIR HITAM untuk pemisah/hover */
+            --secondary-bg: #0c0c0c; 
+            --text-color: #f3f4f6;
+            /* AKESEN CYAN */
+            --accent-color: #06b6d4; 
+            --main-transition-duration: 0.35s;
+            --padding-x: 20px;
+            /* Shadow color disesuaikan agar cocok dengan aksen cyan */
+            --shadow-color: rgba(6, 182, 212, 0.2); 
+        }
+
+        /* ------------------------------------------------------------------------------------- */
+        /* Layout utama */
+        /* ------------------------------------------------------------------------------------- */
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg); 
+            height: 100vh;
+            /* FIX: Menghilangkan potensi scrollbar horizontal */
+            overflow: hidden; 
+            overflow-x: hidden; 
+            transition: background-color 0.5s ease;
+        }
+
+        /* Area pemicu Hover (Trigger) */
+        #edge-trigger {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--touch-area);
+            z-index: 3000;
+            cursor: pointer;
+        }
+        
+        /* Indikator Pemicu (UX: memberikan umpan balik visual) */
+        #edge-trigger::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1px;
+            transition: background-color 0.2s ease, width 0.2s ease;
+        }
+
+        #edge-trigger:hover::after {
+            background: var(--accent-color);
+            width: 3px;
+        }
+
+        /* ------------------------------------------------------------------------------------- */
+        /* Sidebar (Elemen Navigasi) */
+        /* ------------------------------------------------------------------------------------- */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            z-index: 2000;
+            padding: 0;
+            
+            /* FIX: Mendorong sedikit lebih jauh untuk menyembunyikan border 3px */
+            transform: translateX(calc(-1 * (var(--sidebar-width) + var(--sidebar-border-width))));
+            
+            transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+
+            border-right: var(--sidebar-border-width) solid var(--accent-color);
+            
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header/Profil */
+        .sidebar-header {
+            padding: 30px var(--padding-x) 20px;
+            border-bottom: 1px solid var(--secondary-bg);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color); 
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-header p {
+            margin: 5px 0 0;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Navigasi Styling */
+        #sidebar nav {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 var(--padding-x);
+            overflow-y: auto;
+        }
+
+        #sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.6, 1);
+            font-weight: 500;
+        }
+
+        #sidebar a i {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease;
+        }
+
+        /* Hover State */
+        #sidebar a:hover {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            transform: translateX(3px);
+        }
+
+        #sidebar a:hover i {
+            color: var(--accent-color); 
+        }
+
+        /* Active State */
+        #sidebar a.active {
+            background-color: var(--accent-color); 
+            color: var(--primary-bg);
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(6, 182, 212, 0.5); 
+        }
+
+        #sidebar a.active i {
+            color: var(--primary-bg);
+        }
+
+        /* Footer Sidebar */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px var(--padding-x);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            text-align: center;
+            border-top: 1px solid var(--secondary-bg);
+        }
+        
+        /* ------------------------------------------------------------------------------------- */
+        /* Area Konten Utama */
+        /* ------------------------------------------------------------------------------------- */
+        #mainContentContainer {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+            transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+            border-left: none;
+        }
+
+        /* Gaya Iframe - FULL SCREEN */
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #ffffff; 
+            box-shadow: none; 
+            border-radius: 0;
+            opacity: 0; 
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
+            pointer-events: none;
+            transform: scale(1); 
+        }
+
+        iframe.active {
+            opacity: 1; 
+            z-index: 10;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+
+        /* =================================================== */
+        /* REVEAL LOGIC DENGAN CLASS JAVASCRIPT (.sidebar-open) */
+        /* =================================================== */
+
+        /* 1. Tampilkan Sidebar */
+        .sidebar-open #sidebar {
+            /* Transform 0 untuk menunjukkan sidebar dan border secara penuh */
+            transform: translateX(0);
+        }
+
+        /* 2. Dorong Konten dan Gelapkan */
+        .sidebar-open #mainContentContainer {
+            transform: translateX(calc(var(--sidebar-width) - 50px));
+            filter: brightness(0.6); 
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Overlay Transparan (Untuk menutup klik luar) */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: 100%;
+            background: transparent;
+            z-index: 1999; 
+            display: none;
+        }
+        
+        .sidebar-open .sidebar-overlay {
+            display: block;
+        }
+    </style>
+</head>
+<body id="body">
+    
+    <div id="edge-trigger"></div>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h2>Adlan M.R</h2>
+            <p>Fullstack Developer | Portofolio</p>
+        </div>
+        
+        <nav role="navigation">
+            <a href="aplikasi.html" data-target="aplikasi-frame" aria-label="Home">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="v-drive.html" data-target="v-drive-frame" aria-label="V-Drive">
+                <i class="fa-solid fa-hard-drive"></i>
+                <span>V-Drive</span>
+            </a>
+            <a href="codingin.html" data-target="codingin-frame" aria-label="Terminal">
+                <i class="fa-solid fa-terminal"></i>
+                <span>Terminal</span>
+            </a>
+        </nav>
+        
+        <div class="sidebar-footer">
+            Versi 2.1 | Desain UI/UX Peningkatan
+        </div>
+    </div>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div id="mainContentContainer">
+        <iframe id="aplikasi-frame" src="aplikasi.html" title="Halaman Utama"></iframe>
+        <iframe id="v-drive-frame" src="v-drive.html" title="Penyimpanan Virtual"></iframe>
+        <iframe id="codingin-frame" src="codingin.html" title="Terminal Simulasi"></iframe>
+    </div>
+
+    <script>
+        const body = document.getElementById('body');
+        const edgeTrigger = document.getElementById('edge-trigger');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mainContentContainer = document.getElementById('mainContentContainer');
+        const links = document.querySelectorAll('#sidebar a');
+        const iframes = document.querySelectorAll('iframe');
+        const ACTIVE_KEY = 'activePage';
+        const DEFAULT_PAGE = 'aplikasi-frame'; 
+        const SIDEBAR_OPEN_CLASS = 'sidebar-open';
+
+        // --- FUNGSI UTILITY ---
+        function openSidebar() {
+            if (!body.classList.contains(SIDEBAR_OPEN_CLASS)) {
+                body.classList.add(SIDEBAR_OPEN_CLASS);
+                // Matikan interaksi pada konten saat menu terbuka
+                mainContentContainer.style.pointerEvents = 'none';
+            }
+        }
+
+        function closeSidebar() {
+            if (body.classList.contains(SIDEBAR_OPEN_CLASS)) {
+                body.classList.remove(SIDEBAR_OPEN_CLASS);
+                // Kembalikan interaksi pada konten
+                setTimeout(() => {
+                    mainContentContainer.style.pointerEvents = 'auto';
+                }, 350); 
+            }
+        }
+
+        // --- LOGIKA BUKA/TUTUP ---
+        
+        // 1. Edge Hover 
+        edgeTrigger.addEventListener('mouseenter', openSidebar);
+        
+        // 2. Klik di luar Sidebar (Overlay)
+        sidebarOverlay.addEventListener('click', closeSidebar);
+        
+        // 3. Menutup Sidebar setelah Navigasi
+        links.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const target = link.dataset.target;
+                setActiveState(target);
+                
+                closeSidebar();
+            });
+        });
+
+        // --- LOGIKA NAVIGASI ---
+
+        const setActiveState = (targetId) => {
+            links.forEach(l => {
+                l.classList.remove('active');
+                l.removeAttribute('aria-current');
+                if (l.dataset.target === targetId) {
+                    l.classList.add('active');
+                    l.setAttribute('aria-current', 'page');
+                    const newUrl = l.getAttribute('href');
+                    history.replaceState(null, '', newUrl);
+                }
+            });
+            
+            iframes.forEach(f => f.classList.remove('active'));
+            const activeFrame = document.getElementById(targetId);
+            if (activeFrame) {
+                activeFrame.classList.add('active');
+            }
+            
+            sessionStorage.setItem(ACTIVE_KEY, targetId);
+        };
+
+
+        // --- INISIALISASI ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = sessionStorage.getItem(ACTIVE_KEY);
+            let initialTarget = DEFAULT_PAGE;
+            const currentPath = window.location.pathname.split('/').pop(); 
+            
+            let pathTarget = null;
+            links.forEach(l => {
+                if (l.getAttribute('href') === currentPath) {
+                    pathTarget = l.dataset.target;
+                }
+            });
+            
+            if (pathTarget && document.getElementById(pathTarget)) {
+                initialTarget = pathTarget;
+            } else if (saved && document.getElementById(saved)) {
+                initialTarget = saved;
+            }
+            
+            setActiveState(initialTarget);
+            
+            closeSidebar();
+        });
+    </script>
+</body>
+</html>
