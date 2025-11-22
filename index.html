@@ -10,18 +10,31 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     
     <style>
-        /* Light Mode Variables - Classic Blue/Black Terminal */
         :root {
-            --bg-light: #FFFFFF; 
-            --text-dark: #333333; 
+            --bg-light: black; 
+            --text-dark: red; 
             --text-secondary: #666666; 
-            --accent-blue: #007BFF; 
-            --terminal-bg: #F8F8F8; 
-            --terminal-border: #BBBBBB;
+            --accent-blue: red; 
+            --terminal-bg: black; 
+            --terminal-border: black;
             --font-main: 'Roboto Mono', monospace; 
             --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --glitch-duration: 0.2s; 
+            --screen-glitch-duration: 0.03s; 
+            --glitch-color1: #FF00FF; 
+            --glitch-color2: #00FFFF; 
+            --glitch-color3: #FF6600; 
         }
         
+        @keyframes body-shake {
+            0% { transform: translate(1px, 1px); }
+            20% { transform: translate(-1px, 2px); }
+            40% { transform: translate(-2px, -1px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(1px, -2px); }
+            100% { transform: translate(-2px, 1px); }
+        }
+
         body {
             font-family: var(--font-main);
             display: flex;
@@ -32,6 +45,12 @@
             margin: 0;
             background-color: var(--bg-light); 
             color: var(--text-dark); 
+            overflow: hidden; 
+            transition: transform 0.05s linear; 
+        }
+        
+        .shaking {
+            animation: body-shake 0.05s infinite step-end;
         }
 
         .container {
@@ -43,23 +62,126 @@
             border: 1px solid var(--terminal-border);
             border-radius: 8px;
             box-shadow: var(--shadow-subtle);
+            position: relative; 
+            z-index: 10; 
         }
         
+        @keyframes danger-blink {
+            0%, 100% { 
+                color: var(--accent-blue); 
+                text-shadow: none;
+            }
+            10%, 30%, 50%, 70%, 90% { 
+                color: white; 
+                text-shadow: 0 0 5px red, 0 0 10px red; 
+            }
+            20%, 40%, 60%, 80% { 
+                color: red; 
+                text-shadow: 0 0 2px var(--accent-blue);
+            }
+        }
+
+        .header-title {
+            font-size: 15px; 
+            font-weight: 700;
+            color: var(--accent-blue);
+            text-align: center;
+            animation: danger-blink 2s infinite step-end;
+        }
+
+        @keyframes glitch-anim {
+            0%, 100% { transform: translate(0); opacity: 1; }
+            15% { transform: translate(-5px, 5px); color: var(--glitch-color1); }
+            30% { transform: translate(5px, -5px); color: var(--glitch-color2); }
+            45% { transform: translate(-3px, 3px); color: var(--glitch-color3); }
+            60% { transform: translate(3px, -3px); color: var(--glitch-color1); }
+            75% { transform: translate(-1px, 1px); color: var(--glitch-color2); }
+        }
+
+        .glitch-effect {
+            animation: glitch-anim var(--glitch-duration) steps(1, end);
+        }
+        
+        .header-title.glitch-effect {
+            text-shadow: 
+                -2px 0 var(--glitch-color1), 
+                2px 0 var(--glitch-color2);
+            animation: none; 
+            color: red;
+        }
+        
+        #glitchOverlay {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; 
+            z-index: 99; 
+            opacity: 0; 
+            transition: opacity 0.1s ease-out; 
+            background: black; 
+        }
+
+        @keyframes screen-glitch-shift {
+            0% { transform: translate(15px, 15px); }
+            20% { transform: translate(-10px, -10px); }
+            40% { transform: translate(20px, -15px); }
+            60% { transform: translate(-15px, 10px); }
+            80% { transform: translate(10px, 20px); }
+            100% { transform: translate(15px, 15px); }
+        }
+
+        .screen-glitch-active {
+            opacity: 0.8; 
+            filter: saturate(2) contrast(1.5); 
+        }
+        
+        .screen-glitch-active::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                90deg, 
+                var(--glitch-color1) 0%, 
+                var(--glitch-color2) 3%, 
+                var(--glitch-color3) 6%
+            ); 
+            opacity: 0.2; 
+            mix-blend-mode: color-dodge; 
+            
+            animation: screen-glitch-shift var(--screen-glitch-duration) infinite step-end;
+            transform: translate(4vw, -4vh) scale(1.1); 
+        }
+
+        .screen-glitch-active::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg, 
+                var(--glitch-color1) 0px, 
+                var(--glitch-color2) 1px, 
+                transparent 2px,
+                transparent 4px
+            );
+            opacity: 0.3;
+            mix-blend-mode: overlay; 
+            
+            animation: screen-glitch-shift var(--screen-glitch-duration) infinite step-end reverse;
+            transform: translate(-5vw, 5vh) scale(0.9);
+        }
+
         .header-info {
             margin-bottom: 20px;
             border-bottom: 1px dashed var(--terminal-border);
             padding-bottom: 15px;
-        }
-
-        .header-title {
-            font-size: 1.5rem; 
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        .header-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
         }
         
         .terminal-output {
@@ -68,22 +190,21 @@
             font-size: 0.9rem;
             white-space: pre-wrap;
             overflow-y: hidden;
-            max-height: 350px; /* Tingkatkan tinggi sedikit karena tidak ada prompt */
+            max-height: 350px; 
         }
 
-        /* STYLE BARU: Menyembunyikan input secara visual */
         .hidden-input {
-            position: absolute; /* Posisikan absolut agar tidak memengaruhi tata letak */
-            top: 0; /* Letakkan di sudut */
+            position: absolute; 
+            top: 0; 
             left: 0; 
-            width: 1px; /* Ukuran sangat kecil */
+            width: 1px; 
             height: 1px;
-            opacity: 0; /* Jadikan transparan sepenuhnya */
-            z-index: -1; /* Pindahkan ke belakang */
+            opacity: 0; 
+            z-index: -1; 
         }
         
         .message-success { color: green; }
-        .message-error { color: red; }
+        .message-error { color: blue; }
 
     </style>
 </head>
@@ -92,11 +213,8 @@
     <div class="container" id="terminalContainer">
         
         <div class="header-info">
-            <div class="header-title">
-                [ ACCESS NODE: 01A ]
-            </div>
-            <div class="header-subtitle">
-                Akses tidak diberikan<br>Memberikan virus ke perangkat
+            <div class="header-title" id="glitchTitle"> 
+                Installing a virus for a device...
             </div>
         </div>
 
@@ -113,8 +231,9 @@
 
     </div>
     
+    <div id="glitchOverlay"></div>
+    
     <script>
-        // --- KONFIGURASI FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCba6M_spBXvuG91Zn-XWJ4bSTX6vNcST0",
             authDomain: "index-68220.firebaseapp.com",
@@ -128,39 +247,52 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        // -----------------------------
 
         const input = document.getElementById('passwordInput');
         const output = document.getElementById('output');
+        const glitchTitle = document.getElementById('glitchTitle'); 
+        const glitchOverlay = document.getElementById('glitchOverlay'); 
+        const bodyElement = document.body;
         const REDIRECT_URL = 'beranda.html'; 
 
         let storedHash = null; 
         let isAuthenticating = false;
         
-        // Array Teks untuk efek mengetik tak henti (cepat)
         const LOOP_TEXTS = [
-            "Scanning port 80/tcp... OPEN",
-            "Establishing TLS connection (256-bit)... OK",
-            "Executing query: SELECT * FROM users WHERE status=active",
-            "Hashing input buffer with SHA-256...",
-            "Checking local integrity checksum: [OK]",
-            "Waiting for remote server response...",
-            "Generating encryption key sequence...",
-            "ALERT: Attempted unauthorized read access detected.",
-            "Processing background tasks... 98% complete",
-            "Starting automated code scramble routine...",
-            "DATA STREAM INITIATED: Encrypting payload...",
-            "CONNECTION STATUS: SECURE",
-        ];
+            "DNS RESOLUTION FAILED: Attempting IP fallback scan...",
+            "PORT SCANNING INITIATED: Probing ports 21, 22, 23, 445.",
+            "IDENTIFYING OS VERSION: Target system running Windows 10 build 19045.",
+            "ENUMERATING USER ACCOUNTS: Found 4 active user profiles.",
+            "SEARCHING EXPLOIT DATABASE: Matching vulnerability 'EternalBlue'...",
+            "PREPARING INJECTION BUFFER: Shellcode size calculated: 1024 bytes.",
+            "INITIATING SMB EXPLOIT SEQUENCE: Sending fragmented packets.",
+            "BUFFER OVERFLOW SUCCESSFUL: JUMP ADDRESS SET TO 0x00AABBCC.",
+            "DISABLING INTRUSION DETECTION SYSTEM (IDS): Configuration file modified.",
+            "ESTABLISHING REVERSE SHELL: Connected to C2 server via port 8080.",
+            "FILE TRANSFER ACTIVE: Downloading trojan dropper as 'svch0st.exe'.",
+            "DELETING LOGS: Clearing system and security event records.",
+            "ELEVATING PRIVILEGES: Injecting into LSASS process.",
+            "PASSWORD HASHES DUMPED: Decrypting cached credentials...",
+            "CREATING PERSISTENCE: Setting Scheduled Task 'UpdaterService'.",
+            "HOOKING API CALLS: Monitoring keyboard and mouse input.",
+            "STARTING KEYLOGGER MODULE: Input monitoring began at 10:52:42 AM.",
+            "PATCHING BINARIES: Inserting malicious DLL into critical path.",
+            "MODIFYING HOSTS FILE: Redirecting security domain traffic.",
+            "ENCRYPTING USER DATA: All files with extensions .doc, .jpg, .zip locked.",
+            "RANSOM NOTE GENERATED: Filename 'READ_ME_DECRYPT.txt' placed on Desktop.",
+            "SCANNING NETWORK SHARES: Looking for accessible remote drives.",
+            "PROPAGATION MODULE ACTIVE: Spreading to 192.168.1.0/24 subnet.",
+            "ACTIVATING DENIAL OF SERVICE (DoS) THREAD: Stressing CPU resources.",
+            "MALWARE OPERATION STATUS: FULLY COMMITTED AND UNDETECTED.",
+            "SHUTTING DOWN SYSTEM SERVICE: Preventing remote access and recovery.",
+        ];        
         
-        // Helper: compute SHA-256 hex
         async function sha256Hex(str) {
             const enc = new TextEncoder().encode(str);
             const digest = await crypto.subtle.digest('SHA-256', enc);
             return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Fungsi untuk menambahkan baris ke output
         function appendOutput(text, className = '') {
             const line = document.createElement('div');
             line.textContent = text;
@@ -174,7 +306,6 @@
             output.scrollTop = output.scrollHeight; 
         }
 
-        // --- Fungsi Typing Effect Tak Henti (DIPERCEPAT) ---
         function startLoopTyping() {
             let currentLine = '';
             let lineIndex = 0;
@@ -185,32 +316,67 @@
                     textIndex = Math.floor(Math.random() * LOOP_TEXTS.length);
                     currentLine = LOOP_TEXTS[textIndex];
                     lineIndex = 0;
-                    // Teks baru ditambahkan ke output
                     appendOutput(`> ${currentLine.slice(0, lineIndex)}`, 'message-secondary');
                 }
 
                 if (lineIndex < currentLine.length) {
-                    // Update baris terakhir di output dengan karakter berikutnya
                     const lastLine = output.lastElementChild;
                     lastLine.textContent = `> ${currentLine.slice(0, lineIndex + 1)} |`; 
                     lineIndex++;
                     
-                    // JEDA PENGETIKAN: SANGAT CEPAT (5-15ms)
-                    setTimeout(typeChar, Math.random() * 10 + 5); 
+                    setTimeout(typeChar, 0); 
                 } else {
-                    // Baris selesai
                     const lastLine = output.lastElementChild;
                     lastLine.textContent = `> ${currentLine.slice(0, lineIndex)}`; 
-                    currentLine = ''; // Reset
+                    currentLine = ''; 
                     
-                    // JEDA ANTAR BARIS: SINGKAT (100-300ms)
-                    setTimeout(typeChar, Math.random() * 200 + 100); 
+                    setTimeout(typeChar, Math.random() * 4 + 1); 
                 }
             }
             typeChar();
         }
 
-        // --- Fungsi Utama: Memuat Hash Sandi ---
+        function startElementGlitchEffect() {
+            const container = document.getElementById('terminalContainer');
+            const elementsToGlitch = [glitchTitle, container];
+
+            function triggerGlitch() {
+                elementsToGlitch.forEach(el => {
+                    el.classList.add('glitch-effect');
+                });
+
+                setTimeout(() => {
+                    elementsToGlitch.forEach(el => {
+                        el.classList.remove('glitch-effect');
+                    });
+                    
+                    const nextGlitchTime = Math.random() * 2500 + 500; 
+                    setTimeout(triggerGlitch, nextGlitchTime);
+                }, 200); 
+            }
+            
+            setTimeout(triggerGlitch, 1000); 
+        }
+
+        function startScreenGlitch() {
+            function triggerScreenGlitch() {
+                glitchOverlay.classList.add('screen-glitch-active');
+                bodyElement.classList.add('shaking'); 
+                
+                const activeDuration = Math.random() * 200 + 100; 
+                
+                setTimeout(() => {
+                    glitchOverlay.classList.remove('screen-glitch-active');
+                    bodyElement.classList.remove('shaking'); 
+
+                    const nextGlitchTime = Math.random() * 1500 + 500; 
+                    setTimeout(triggerScreenGlitch, nextGlitchTime);
+                }, activeDuration); 
+            }
+            
+            setTimeout(triggerScreenGlitch, 500); 
+        }
+
         async function preloadPasswordHash() {
             try {
                 const snapshot = await db.ref('real/passwordHash').once('value');
@@ -220,7 +386,7 @@
                     appendOutput("ERROR: Failed to retrieve hash. DB offline.", 'message-error');
                 } else {
                     appendOutput("SUCCESS: Hash loaded. System operational.", 'message-success');
-                    input.focus(); // Pastikan fokus ada di input tersembunyi
+                    input.focus(); 
                 }
 
             } catch (error) {
@@ -229,7 +395,6 @@
             }
         }
 
-        // --- Event Listener Enter ---
         input.addEventListener('keydown', async (event) => {
             if (event.key !== 'Enter' || isAuthenticating) return;
             
@@ -240,14 +405,12 @@
 
             isAuthenticating = true;
             
-            // Tampilkan simulasi verifikasi di output terminal
             appendOutput(`// Verifying input (${password.length} chars) via secure channel...`, 'message-secondary');
             
             const inputHash = await sha256Hex(password);
             
             if (inputHash === storedHash) {
                 appendOutput('ACCESS GRANTED. Redirecting...', 'message-success');
-                // PENGALIHAN SEGERA
                 setTimeout(() => {
                     window.location.href = REDIRECT_URL;
                 }, 500); 
@@ -255,17 +418,17 @@
             } else {
                 appendOutput('ACCESS DENIED. Invalid credentials.', 'message-error');
                 input.value = '';
-                input.focus(); // Pastikan fokus kembali
+                input.focus();
                 isAuthenticating = false;
             }
         });
 
-        // --- Inisialisasi ---
         document.addEventListener('DOMContentLoaded', () => {
             preloadPasswordHash(); 
             startLoopTyping(); 
+            startElementGlitchEffect(); 
+            startScreenGlitch(); 
             
-            // Penting: Memastikan input selalu fokus bahkan setelah diklik di tempat lain
             document.addEventListener('click', () => {
                 input.focus();
             });
