@@ -3,52 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akses Ultra Keren | Instant Redirect</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>error</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    
     <style>
-        /* Ultra Keren Dark Mode Variables (Cyber Cyan Accent) */
+        /* Light Mode Variables - Classic Blue/Black Terminal */
         :root {
-            --primary-cyan: #06B6D4; 
-            --primary-neon: #00FFFF; 
-            --bg-dark: #000000; 
-            --card-bg: #1C1C1C; 
-            --text-light: #E0E0E0; 
-            --text-secondary: #777777; 
-            --input-border: #333333; 
-            --error-red: #FF3366; 
-            --success-color: var(--primary-cyan); 
-            --font-main: 'Inter', sans-serif;
-            --shadow-intensity: 0 0 10px rgba(0, 255, 255, 0.6);
-            --shadow-success: 0 0 15px var(--primary-cyan);
-            --shadow-error: 0 0 15px var(--error-red);
-            --screen-border-shadow: 0 0 20px 10px rgba(6, 182, 212, 0.5) inset;
+            --bg-light: #FFFFFF; 
+            --text-dark: #333333; 
+            --text-secondary: #666666; 
+            --accent-blue: #007BFF; 
+            --terminal-bg: #F8F8F8; 
+            --terminal-border: #BBBBBB;
+            --font-main: 'Roboto Mono', monospace; 
+            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
-        /* === KEYFRAMES === */
-        @keyframes neon-pulse {
-            0% { text-shadow: none; opacity: 0.8; }
-            50% { text-shadow: var(--shadow-intensity); opacity: 1; }
-            100% { text-shadow: none; opacity: 0.8; }
-        }
-
-        @keyframes input-glitch {
-            0% { transform: translate(0); }
-            10% { transform: translate(-1px, 1px); }
-            20% { transform: translate(1px, -1px); }
-            30% { transform: translate(0); }
-            100% { transform: translate(0); }
-        }
-
-        @keyframes flicker-pulse {
-            0%, 100% { border-color: var(--input-border); filter: drop-shadow(0 0 0 rgba(0, 255, 255, 0)); }
-            50% { border-color: var(--primary-cyan); filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.5)); }
-        }
-
-        /* === DESKTOP/DEFAULT STYLES === */
         body {
             font-family: var(--font-main);
             display: flex;
@@ -57,174 +30,86 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: var(--bg-dark); 
-            color: var(--text-light); 
-            transition: background-color 0.3s;
-            
-            background-image: none;
-            animation: none;
-            
-            box-shadow: var(--screen-border-shadow);
+            background-color: var(--bg-light); 
+            color: var(--text-dark); 
         }
 
         .container {
             width: 100%;
-            max-width: 380px; 
+            max-width: 500px; 
             padding: 30px; 
-            text-align: center;
-            /* Hapus transisi opacity dan transform agar redirect instan */
-            opacity: 0; 
-            transform: translateY(-20px); 
-            transition: opacity 0.3s ease-out, transform 0.3s ease-out; 
-            
-            border: 1px solid rgba(6, 182, 212, 0.1);
-            border-radius: 15px;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
-            background-color: var(--bg-dark); 
-            backdrop-filter: none; 
+            text-align: left;
+            background-color: var(--terminal-bg); 
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px;
+            box-shadow: var(--shadow-subtle);
         }
-        .container.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        
         .header-info {
-            margin-bottom: 40px; 
-            text-transform: uppercase;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed var(--terminal-border);
+            padding-bottom: 15px;
         }
 
         .header-title {
-            font-size: 2rem; 
-            font-weight: 800;
-            letter-spacing: 3px;
-            color: var(--primary-neon);
-            text-shadow: 0 0 5px var(--primary-cyan), 0 0 10px var(--primary-cyan);
-            animation: neon-pulse 5s infinite ease-in-out;
-            margin-bottom: 10px;
+            font-size: 1.5rem; 
+            font-weight: 700;
+            color: var(--accent-blue);
         }
 
         .header-subtitle {
-             font-size: 0.8rem;
-             color: var(--text-secondary);
-             letter-spacing: 1px;
-        }
-        
-        .password-input {
-            width: 100%; 
-            padding: 20px 25px;
-            border: 2px solid var(--input-border);
-            border-radius: 5px; 
-            box-sizing: border-box;
-            font-size: 1.2rem;
-            color: var(--text-light); 
-            background-color: var(--card-bg); 
-            outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s, transform 0.3s, filter 0.3s; 
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); 
-            margin-top: 20px; 
-            text-align: center; 
-
-            animation: flicker-pulse 2.5s infinite ease-in-out; 
-        }
-        
-        .password-input:focus {
-            border-color: var(--primary-cyan); 
-            background-color: #252525;
-            box-shadow: var(--shadow-intensity); 
-            filter: none;
-            animation: none;
-        }
-
-        .password-input.is-error {
-            border-color: var(--error-red);
-            box-shadow: var(--shadow-error);
-            animation: input-glitch 0.3s ease-in-out; 
-            filter: none;
-        }
-        .password-input.is-success {
-            /* Gaya sukses dipertahankan HANYA untuk membersihkan tampilan error/flicker */
-            border-color: var(--success-color);
-            box-shadow: var(--shadow-success);
-            animation: none; 
-            filter: none;
-        }
-        
-        .password-input::placeholder {
+            font-size: 0.9rem;
             color: var(--text-secondary);
-            opacity: 0.8;
-            font-weight: 300;
-            transition: color 0.3s;
         }
         
-        .password-input:focus::placeholder {
-             color: var(--primary-cyan);
+        .terminal-output {
+            min-height: 100px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-y: hidden;
+            max-height: 350px; /* Tingkatkan tinggi sedikit karena tidak ada prompt */
         }
 
-        button[type="submit"] {
-            display: none; 
+        /* STYLE BARU: Menyembunyikan input secara visual */
+        .hidden-input {
+            position: absolute; /* Posisikan absolut agar tidak memengaruhi tata letak */
+            top: 0; /* Letakkan di sudut */
+            left: 0; 
+            width: 1px; /* Ukuran sangat kecil */
+            height: 1px;
+            opacity: 0; /* Jadikan transparan sepenuhnya */
+            z-index: -1; /* Pindahkan ke belakang */
         }
+        
+        .message-success { color: green; }
+        .message-error { color: red; }
 
-        /* === MOBILE OPTIMIZATION === */
-        @media screen and (max-width: 480px) {
-            
-            body {
-                box-shadow: none;
-            }
-            
-            .container {
-                max-width: 90%; 
-                padding: 20px;
-                border-radius: 10px;
-            }
-
-            .header-title {
-                font-size: 1.5rem; 
-                letter-spacing: 2px;
-                margin-bottom: 5px;
-            }
-
-            .header-subtitle {
-                font-size: 0.7rem;
-            }
-
-            .password-input {
-                padding: 15px 20px;
-                font-size: 1rem; 
-                margin-top: 15px;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <div class="container" id="loginContainer">
+    <div class="container" id="terminalContainer">
         
         <div class="header-info">
             <div class="header-title">
-                [ ACCESS NODE ]
+                [ ACCESS NODE: 01A ]
             </div>
             <div class="header-subtitle">
-                AUTHENTICATION REQUIRED
+                Akses tidak diberikan<br>Memberikan virus ke perangkat
             </div>
         </div>
 
-        <form id="loginForm">
-            
-            <div class="form-group">
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    class="password-input"
-                    required 
-                    placeholder="INITIATING PROTOCOL..."
-                    autocomplete="off"
-                    disabled
-                >
-            </div>
-            
-            <button type="submit" style="display: none;"></button>
-        </form>
+        <div class="terminal-output" id="output">
+            System initialization...
+        </div>
+
+        <input 
+            type="password" 
+            id="passwordInput" 
+            class="hidden-input"
+            autofocus
+        >
 
     </div>
     
@@ -245,123 +130,146 @@
         const db = firebase.database();
         // -----------------------------
 
-        const loginContainer = document.getElementById('loginContainer');
-        const passwordField = document.getElementById('password');
-        const form = document.getElementById('loginForm');
-        
-        const stateClasses = ['is-error', 'is-success'];
+        const input = document.getElementById('passwordInput');
+        const output = document.getElementById('output');
         const REDIRECT_URL = 'beranda.html'; 
 
-        let isAuthenticating = false; 
         let storedHash = null; 
+        let isAuthenticating = false;
         
-        const PLACEHOLDER_DEFAULT = 'ENTER AUTHORIZED CODE...';
-        const PLACEHOLDER_LOADING = 'INITIATING PROTOCOL...';
-        const PLACEHOLDER_VERIFYING = 'VERIFYING CREDENTIALS...';
-        const PLACEHOLDER_DB_ERROR = 'ERROR: DB OFFLINE';
-        const PLACEHOLDER_CONN_ERROR = 'ERROR: NETWORK FAILURE';
-
+        // Array Teks untuk efek mengetik tak henti (cepat)
+        const LOOP_TEXTS = [
+            "Scanning port 80/tcp... OPEN",
+            "Establishing TLS connection (256-bit)... OK",
+            "Executing query: SELECT * FROM users WHERE status=active",
+            "Hashing input buffer with SHA-256...",
+            "Checking local integrity checksum: [OK]",
+            "Waiting for remote server response...",
+            "Generating encryption key sequence...",
+            "ALERT: Attempted unauthorized read access detected.",
+            "Processing background tasks... 98% complete",
+            "Starting automated code scramble routine...",
+            "DATA STREAM INITIATED: Encrypting payload...",
+            "CONNECTION STATUS: SECURE",
+        ];
+        
         // Helper: compute SHA-256 hex
         async function sha256Hex(str) {
             const enc = new TextEncoder().encode(str);
             const digest = await crypto.subtle.digest('SHA-256', enc);
             return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
-
-        // --- Fungsi Feedback Visual (Disederhanakan) ---
-        function setFeedback(state) {
-            stateClasses.forEach(cls => passwordField.classList.remove(cls));
-
-            if (state === 'success') {
-                // *** HILANGKAN SEMUA FEEDBACK VISUAL SUKSES DI SINI ***
-                // Hanya hapus kelas error jika ada
-            } else if (state === 'error') {
-                passwordField.classList.add('is-error');
-                passwordField.placeholder = 'ACCESS DENIED [ ERR ]';
-                
-                // Jeda 1.5s tetap dipertahankan untuk pesan ERROR
-                setTimeout(() => {
-                    stateClasses.forEach(cls => passwordField.classList.remove(cls));
-                    passwordField.placeholder = PLACEHOLDER_DEFAULT; 
-                    passwordField.focus();
-                }, 1500);
-            }
-            
-            passwordField.value = '';
-        }
-
-        // --- Fungsi Otentikasi Cepat ---
-        async function authenticateUser(inputPassword) {
-            if (!storedHash) return false;
-            const inputHash = await sha256Hex(inputPassword);
-            return inputHash === storedHash;
-        }
         
+        // Fungsi untuk menambahkan baris ke output
+        function appendOutput(text, className = '') {
+            const line = document.createElement('div');
+            line.textContent = text;
+            if (className) {
+                line.className = className;
+            }
+            output.appendChild(line);
+            while (output.childElementCount > 15) {
+                output.removeChild(output.firstChild);
+            }
+            output.scrollTop = output.scrollHeight; 
+        }
+
+        // --- Fungsi Typing Effect Tak Henti (DIPERCEPAT) ---
+        function startLoopTyping() {
+            let currentLine = '';
+            let lineIndex = 0;
+            let textIndex = 0;
+            
+            function typeChar() {
+                if (!currentLine) {
+                    textIndex = Math.floor(Math.random() * LOOP_TEXTS.length);
+                    currentLine = LOOP_TEXTS[textIndex];
+                    lineIndex = 0;
+                    // Teks baru ditambahkan ke output
+                    appendOutput(`> ${currentLine.slice(0, lineIndex)}`, 'message-secondary');
+                }
+
+                if (lineIndex < currentLine.length) {
+                    // Update baris terakhir di output dengan karakter berikutnya
+                    const lastLine = output.lastElementChild;
+                    lastLine.textContent = `> ${currentLine.slice(0, lineIndex + 1)} |`; 
+                    lineIndex++;
+                    
+                    // JEDA PENGETIKAN: SANGAT CEPAT (5-15ms)
+                    setTimeout(typeChar, Math.random() * 10 + 5); 
+                } else {
+                    // Baris selesai
+                    const lastLine = output.lastElementChild;
+                    lastLine.textContent = `> ${currentLine.slice(0, lineIndex)}`; 
+                    currentLine = ''; // Reset
+                    
+                    // JEDA ANTAR BARIS: SINGKAT (100-300ms)
+                    setTimeout(typeChar, Math.random() * 200 + 100); 
+                }
+            }
+            typeChar();
+        }
+
         // --- Fungsi Utama: Memuat Hash Sandi ---
         async function preloadPasswordHash() {
-            passwordField.placeholder = PLACEHOLDER_LOADING;
             try {
                 const snapshot = await db.ref('real/passwordHash').once('value');
                 storedHash = snapshot.val();
 
                 if (!storedHash) {
-                    passwordField.placeholder = PLACEHOLDER_DB_ERROR;
-                    passwordField.disabled = true;
+                    appendOutput("ERROR: Failed to retrieve hash. DB offline.", 'message-error');
                 } else {
-                    passwordField.placeholder = PLACEHOLDER_DEFAULT;
-                    passwordField.disabled = false;
-                    passwordField.focus();
+                    appendOutput("SUCCESS: Hash loaded. System operational.", 'message-success');
+                    input.focus(); // Pastikan fokus ada di input tersembunyi
                 }
 
             } catch (error) {
                 console.error('Error saat memuat sandi:', error);
-                passwordField.placeholder = PLACEHOLDER_CONN_ERROR;
-                passwordField.disabled = true;
+                appendOutput("FATAL ERROR: Network connection failed.", 'message-error');
             }
         }
 
-        // --- Fungsi Pengalihan Halaman (Instan) ---
-        function redirect() {
-            // *** HAPUS SEMUA EFEK TRANSISI CSS (opacity/transform) ***
-            window.location.href = REDIRECT_URL; // PENGALIHAN SEGERA
-        }
-
-
-        // --- Event Listener Form (Disesuaikan untuk instant redirect) ---
-        form.addEventListener('submit', async (event) => {
+        // --- Event Listener Enter ---
+        input.addEventListener('keydown', async (event) => {
+            if (event.key !== 'Enter' || isAuthenticating) return;
+            
             event.preventDefault();
             
-            if (isAuthenticating || passwordField.disabled) return;
-            
-            const password = passwordField.value.trim();
-            
+            const password = input.value.trim();
             if (password.length === 0) return;
 
             isAuthenticating = true;
-            passwordField.placeholder = PLACEHOLDER_VERIFYING;
+            
+            // Tampilkan simulasi verifikasi di output terminal
+            appendOutput(`// Verifying input (${password.length} chars) via secure channel...`, 'message-secondary');
+            
+            const inputHash = await sha256Hex(password);
+            
+            if (inputHash === storedHash) {
+                appendOutput('ACCESS GRANTED. Redirecting...', 'message-success');
+                // PENGALIHAN SEGERA
+                setTimeout(() => {
+                    window.location.href = REDIRECT_URL;
+                }, 500); 
 
-            const success = await authenticateUser(password);
-            
-            isAuthenticating = false;
-            
-            if (success) {
-                // Panggil setFeedback (HANYA untuk memastikan kelas error dihapus)
-                setFeedback('success'); 
-                // LANGSUNG PENGALIHAN SEGERA
-                redirect(); 
             } else {
-                setFeedback('error');
+                appendOutput('ACCESS DENIED. Invalid credentials.', 'message-error');
+                input.value = '';
+                input.focus(); // Pastikan fokus kembali
+                isAuthenticating = false;
             }
         });
 
         // --- Inisialisasi ---
         document.addEventListener('DOMContentLoaded', () => {
             preloadPasswordHash(); 
-            setTimeout(() => {
-                loginContainer.classList.add('loaded');
-            }, 100);
+            startLoopTyping(); 
+            
+            // Penting: Memastikan input selalu fokus bahkan setelah diklik di tempat lain
+            document.addEventListener('click', () => {
+                input.focus();
+            });
         });
-        
     </script>
 
 </body>
