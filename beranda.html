@@ -6,7 +6,7 @@
     <title>Adlan M.R</title>
     <link rel="icon" href="1.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght+400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -14,7 +14,7 @@
         
         // --- Konfigurasi Firebase Anda (TIDAK DIUBAH) ---
         const firebaseConfig = {
-            apiKey: "AIzaSyCba6M_spBXvuG91Zn-XWJ4bSTX6vNcST0",
+            apiKey: "AIzaSyCba6M_spBXvuG91Zn-XJ4bSTX6vNcST0",
             authDomain: "index-68220.firebaseapp.com",
             databaseURL: "https://index-68220-default-rtdb.firebaseio.com",
             projectId: "index-68220",
@@ -40,18 +40,21 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const edgeTrigger = document.getElementById('edge-trigger');
         const mainNavLinks = document.querySelectorAll('#main-nav a'); 
-        const iframe = document.getElementById('content-frame');
+        
+        const iframeContainer = document.getElementById('iframe-container');
+        let appFrames = document.querySelectorAll('.app-frame'); 
+        
+        const staticFrames = document.querySelectorAll('#iframe-container > .app-frame:not([data-dynamic="true"])');
+
+        let isInitialLoadDone = false; 
         
         const sidebarHeader = document.querySelector('.sidebar-header'); 
-        
         const hamburgerButton = document.getElementById('hamburger-btn'); 
         
         const ACTIVE_KEY = 'activePageUrl'; 
         const DEFAULT_URL = 'https://artsite07.github.io/Ak29238928h92398/home.html'; 
         const SIDEBAR_OPEN_CLASS = 'sidebar-open';
         const SIDEBAR_LOCKED_CLASS = 'sidebar-locked'; 
-        
-        // --- FUNGSI UTILITY (Sidebar Logic) ---
         
         const isSmallScreen = () => window.matchMedia('(max-width: 992px)').matches;
 
@@ -70,7 +73,7 @@
                 }, 350); 
             }
         }
-        
+
         function toggleSidebarLock() {
             if (isSmallScreen()) return; 
 
@@ -84,7 +87,7 @@
             }
         }
 
-        // --- FUNGSI NAVIGASI TERPADU (TIDAK DIUBAH) ---
+        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: Dynamic Frame Selalu Dimuat Ulang) ---
         const setActiveState = (newUrl, element) => {
             document.querySelectorAll('#sidebar a').forEach(l => {
                 l.classList.remove('active');
@@ -96,40 +99,54 @@
                 element.setAttribute('aria-current', 'page');
             }
             
-            if (iframe) {
-                if (iframe.src !== newUrl) {
-                    const overlay = document.getElementById('loading-overlay');
-                    if (overlay) overlay.classList.add('visible');
-                    iframe.src = newUrl;
-                }
+            let targetFrame = document.querySelector(`.app-frame[data-url="${newUrl}"]`);
+
+            if (targetFrame) {
                 
-                history.replaceState(null, '', newUrl);
+                // 1. Sembunyikan dan RESET SEMUA FRAME yang TIDAK AKTIF
+                appFrames.forEach(frame => {
+                    // Cek apakah frame adalah frame dinamis (More Application) dan bukan yang baru diklik
+                    if (frame.dataset.dynamic === "true" && frame !== targetFrame) {
+                         // **RESET**: Atur SRC frame dinamis yang tidak aktif kembali ke about:blank
+                         frame.src = 'about:blank'; 
+                    }
+                    frame.classList.remove('active');
+                });
+
+                // 2. Jika frame belum dimuat (src masih about:blank) ATAU frame dinamis, muat sekarang.
+                if (targetFrame.src === 'about:blank' || targetFrame.src.startsWith('about:blank') || targetFrame.dataset.dynamic === "true") {
+                    // Muat frame, memicu reset jika frame dinamis
+                    targetFrame.src = targetFrame.dataset.url;
+                    
+                    // Listener temporer (opsional)
+                    targetFrame.onload = () => {
+                         targetFrame.onload = null;
+                    };
+                }
+
+                // 3. Tampilkan frame yang dituju
+                targetFrame.classList.add('active');
             }
             
+            // 4. Muat frame statis yang belum dimuat pada klik navigasi pertama
+            if (!isInitialLoadDone) {
+                staticFrames.forEach(frame => {
+                    if (frame.src === 'about:blank') {
+                        frame.src = frame.dataset.url;
+                    }
+                });
+                isInitialLoadDone = true; 
+            }
+            
+            history.replaceState(null, '', newUrl);
             sessionStorage.setItem(ACTIVE_KEY, newUrl);
         };
-        
-        // --- LOGIKA LISTENER IFRAME (TIDAK DIUBAH) ---
-        function setupIframeListener() {
-            const overlay = document.getElementById('loading-overlay');
-            
-            if (iframe && overlay) {
-                iframe.onload = () => {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => {
-                        overlay.classList.remove('visible');
-                        overlay.style.opacity = '1';
-                    }, 300);
-                };
-                
-                iframe.onerror = () => {
-                    console.error("Gagal memuat iframe.");
-                    overlay.classList.remove('visible');
-                };
-            }
+
+        // --- FUNGSI LAINNYA (Tidak diubah, termasuk setupFrameListeners menjadi placeholder) ---
+        function setupFrameListeners() {
+            // Placeholder, tidak ada loading screen, logika loading pindah ke setActiveState
         }
 
-        // --- LOGIKA FIREBASE (TIDAK DIUBAH) ---
         function startRealtimeListener() {
             onValue(shortcutRef, (snapshot) => {
                 shortcutsData = snapshot.val() || {};
@@ -138,13 +155,16 @@
                 console.error("Error membaca data RTDB:", error);
                 document.getElementById('app-grid-dynamic').innerHTML = 
                     '<p style="color:red; font-weight:bold; padding: 10px; font-size: 0.8rem; text-align:center;">Gagal memuat data shortcut.</p>';
+                setupFrameListeners(); 
+                initializeActiveState();
             });
         }
-        
-        // --- FUNGSI renderShortcuts (TIDAK DIUBAH) ---
+
         function renderShortcuts() {
             const grid = document.getElementById('app-grid-dynamic');
             grid.innerHTML = ''; 
+            
+            document.querySelectorAll('.app-frame[data-dynamic="true"]').forEach(f => f.remove());
             
             const keys = Object.keys(shortcutsData);
             
@@ -161,19 +181,29 @@
                  grid.appendChild(separator);
             }
 
-
             const fragment = document.createDocumentFragment();
 
             sortedKeys.forEach((key) => {
                 const item = shortcutsData[key];
                 
+                // 1. BUAT IFRAME DINAMIS - SRC tetap about:blank
+                const dynamicIframe = document.createElement('iframe');
+                dynamicIframe.id = `dynamic-frame-${key}`; 
+                dynamicIframe.className = 'app-frame';
+                dynamicIframe.src = 'about:blank'; // MUAT SAAT DIKLIK
+                dynamicIframe.dataset.url = item.url;
+                dynamicIframe.dataset.dynamic = "true"; // Penanda frame dinamis
+                dynamicIframe.title = item.name;
+                iframeContainer.appendChild(dynamicIframe); 
+
+                // 2. BUAT LINK NAVIGASI
                 const appItem = document.createElement('a');
                 appItem.href = '#'; 
                 appItem.setAttribute('data-url', item.url);
                 appItem.title = item.name;
                 appItem.onclick = (e) => {
                     e.preventDefault();
-                    setActiveState(item.url, appItem);
+                    setActiveState(item.url, appItem); 
                     if (!body.classList.contains(SIDEBAR_LOCKED_CLASS) || isSmallScreen()) {
                         closeSidebar();
                     }
@@ -189,10 +219,12 @@
             
             grid.appendChild(fragment); 
             
+            appFrames = document.querySelectorAll('.app-frame'); 
+
+            setupFrameListeners();
             initializeActiveState();
         }
-        
-        // --- INISIALISASI TERPADU (TIDAK DIUBAH) ---
+
         function initializeActiveState() {
             const savedUrl = sessionStorage.getItem(ACTIVE_KEY);
             
@@ -213,8 +245,7 @@
             setActiveState(initialUrl, initialLink);
             closeSidebar();
         }
-        
-        // --- FUNGSI LOGOUT SIMULASI ---
+
         function handleLogout() {
             console.log("Simulasi Logout...");
             sessionStorage.removeItem(ACTIVE_KEY);
@@ -223,20 +254,18 @@
                 body.classList.remove(SIDEBAR_LOCKED_CLASS);
             }
             closeSidebar();
+            window.location.reload(); 
         }
 
-        // --- LOGIKA UTAMA (DOM Loaded) ---
         window.onload = () => {
-             // 1. Listener Sidebar Kiri (Hover) - Hanya untuk Desktop
+             // 1. Listener Sidebar Kiri (Hover/Mobile)
              edgeTrigger.addEventListener('mouseenter', openSidebar);
              sidebarOverlay.addEventListener('click', closeSidebar);
              
-             // Listener Hamburger
              if (hamburgerButton) {
                  hamburgerButton.addEventListener('click', openSidebar);
              }
 
-             // Listener untuk mengunci/membuka sidebar
              if (sidebarHeader) {
                  sidebarHeader.addEventListener('click', toggleSidebarLock); 
              }
@@ -253,13 +282,11 @@
                  });
              });
              
-             // Listener untuk tombol Logout
              const logoutButton = document.getElementById('logout-button');
              if (logoutButton) {
                  logoutButton.addEventListener('click', handleLogout);
              }
 
-             // Listener untuk menangani resize
              window.addEventListener('resize', () => {
                  if (isSmallScreen() && body.classList.contains(SIDEBAR_LOCKED_CLASS)) {
                      body.classList.remove(SIDEBAR_LOCKED_CLASS);
@@ -270,10 +297,8 @@
              });
              
              // 2. Listener Iframe dan Firebase
-             setupIframeListener(); 
-             startRealtimeListener();
+             startRealtimeListener(); 
         };
-
     </script>
     
     <style>
@@ -565,17 +590,25 @@
             transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
-        /* Gaya Iframe - FULL SCREEN */
-        #content-frame {
+        /* GAYA BARU UNTUK SEMUA IFRAME APLIKASI (CACHE LOGIC) */
+        .app-frame {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: none;
-            background-color: var(--primary-bg); 
-            opacity: 1; 
+            background-color: var(--primary-bg);
+            opacity: 0; /* Sembunyikan secara default */
             z-index: 10;
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* Nonaktifkan interaksi saat tersembunyi */
+        }
+
+        .app-frame.active {
+            opacity: 1; /* Tampilkan iframe yang aktif */
+            z-index: 11;
+            pointer-events: auto; /* Aktifkan interaksi saat aktif */
         }
         
         /* REVEAL LOGIC (Mode Hover) */
@@ -626,17 +659,24 @@
             overflow: hidden; 
         }
 
-        .sidebar-locked #content-frame {
+        .sidebar-locked #iframe-container {
+             /* Pastikan iframe container mengambil 100% dari parent (mainContentContainer) */
+             width: 100%; 
+             height: 100%; 
+        }
+
+        .sidebar-locked .app-frame {
             /* Frame menyesuaikan lebar container */
             width: 100%; 
             height: 100%; 
-            position: relative;
+            position: absolute; /* Tetap absolute di dalam iframe-container */
             
             /* GAYA KOTAK BERUJUNG BULAT - IFRAME */
             border-radius: 12px; 
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
             overflow: hidden; 
         }
+
 
         .sidebar-locked #sidebar {
             transform: translateX(0); /* Pastikan sidebar terlihat penuh */
@@ -654,43 +694,6 @@
         }
 
 
-        /* Elemen Loading Overlay */
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9); 
-            backdrop-filter: blur(2px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 20; 
-            opacity: 1;
-            transition: opacity 0.3s ease-out;
-            pointer-events: none; 
-            visibility: hidden;
-        }
-        
-        #loading-overlay.visible {
-            visibility: visible;
-            pointer-events: auto;
-        }
-        
-        .loading-text {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--accent-color); 
-            animation: pulse 1.5s infinite ease-in-out;
-        }
-        
         /* ------------------------------------------------------------------------------------- */
         /* MEDIA QUERY: LAYAR KECIL (MOBILE/TABLET) */
         /* ------------------------------------------------------------------------------------- */
@@ -784,7 +787,7 @@
                 padding: 0;
             }
             
-            .sidebar-locked #content-frame {
+            .sidebar-locked .app-frame {
                 width: 100%;
                 height: 100%;
                 border-radius: 0;
@@ -846,12 +849,18 @@
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <div id="mainContentContainer">
-        <iframe id="content-frame" class="content-frame active" src="about:blank" title="Area Konten Aplikasi">
-            Browser Anda tidak mendukung iframe.
-        </iframe>
-        
-        <div id="loading-overlay">
-            <span class="loading-text">A</span>
+        <div id="iframe-container" style="width: 100%; height: 100%; position: relative;">
+            
+            <iframe id="home-frame" class="app-frame" src="about:blank" data-url="https://artsite07.github.io/Ak29238928h92398/home.html" title="Halaman Utama">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+            <iframe id="vdrive-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/v-drive" title="Penyimpanan Virtual">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+            <iframe id="terminal-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/codingin" title="Terminal Simulasi">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+
         </div>
     </div>
 </body>
