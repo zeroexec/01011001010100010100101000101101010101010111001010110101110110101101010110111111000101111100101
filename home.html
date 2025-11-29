@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Glitch Subtil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Logo Animasi Elegan</title>
     <style>
-        /* * --- Variabel & Reset ---
+        /* * --- Variabel ---
          */
         :root {
             --dark-bg: #030408; 
-            --accent-cyan: #00e6e6; 
-            --accent-glow: rgba(0, 230, 230, 0.5); /* Glow lebih redup */
-            --glitch-red: #ff00ff; 
-            --glitch-green: #00ff00; 
-            --glitch-blue: #00ffff;
+            --circle-size: 250px; 
+            --float-duration: 3.5s; 
+            --entrance-duration: 1.5s; /* Durasi masuk diperpanjang */
+            --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); /* Kurva elegan (slow-out) */
         }
 
         * {
@@ -23,7 +21,7 @@
             box-sizing: border-box;
         }
 
-        /* * --- Gaya Halaman & Efek Background ---
+        /* * --- Gaya Halaman ---
          */
         body {
             background-color: var(--dark-bg);
@@ -35,29 +33,6 @@
             position: relative;
         }
 
-        body::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                #0000001a, /* Garis lebih halus */
-                #0000001a 1px, 
-                transparent 1px, 
-                transparent 2px
-            );
-            pointer-events: none; 
-            opacity: 0.1;
-            animation: backgroundShift 30s linear infinite; 
-        }
-        
-        @keyframes backgroundShift {
-            from { background-position: 0 0; }
-            to { background-position: 0 100%; }
-        }
-
         /* * --- Container Utama ---
          */
         .welcome-area {
@@ -65,27 +40,40 @@
             z-index: 10;
             opacity: 0;
             transform: scale(0.8);
-            animation: areaEntrance 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+            /* Animasi Masuk Utama: Menggunakan kurva baru dan durasi lebih lama */
+            animation: areaEntrance var(--entrance-duration) var(--entrance-curve) forwards; 
         }
 
-        /* * --- Logo (Tanpa Border, Tanpa Shadow, Glitch Subtil) ---
+        /* * --- Wrapper Lingkaran ---
          */
-        .profile-pic {
-            width: 180px; 
-            height: 180px;
+        .profile-pic-wrapper {
+            width: var(--circle-size); 
+            height: var(--circle-size);
             border-radius: 50%;
-            object-fit: cover;
-            /* Dihapus: border */
-            /* Dihapus: box-shadow (untuk kondisi normal) */
-            display: block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white; 
             
             opacity: 0;
             transform: scale(0.5);
             
+            /* Animasi Masuk Logo: Menggunakan kurva baru dan durasi lebih lama, dengan delay */
             animation: 
-                profileEntrance 1s ease-out forwards 0.8s, /* Masuk */
-                profileFloat 4s ease-in-out infinite 2s,  /* Mengambang */
-                logoGlitch 3s step-end infinite 2s;       /* Glitch Jeda 2.3s */
+                profileEntrance 1.2s var(--entrance-curve) forwards 0.5s, 
+                profileFloat var(--float-duration) ease-in-out infinite 1.7s; /* Delay floating disesuaikan */
+            
+            filter: none;
+        }
+
+        /* * --- Gambar di Dalam Wrapper ---
+         */
+        .profile-pic {
+            width: 100%; 
+            height: 100%;
+            border-radius: 50%; 
+            object-fit: cover;
+            display: block;
         }
 
         /* * --- Keyframes Animasi ---
@@ -99,54 +87,16 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Mengubah ProfileFloat: Hanya Mengambang, Tanpa Shadow Berlebihan */
+        /* Animasi Mengambang Murni */
         @keyframes profileFloat {
-            0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
-            50% { transform: translateY(-8px) scale(1.01); filter: drop-shadow(0 0 10px var(--accent-cyan)); }
-            100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
-        }
-
-        /* --- Animasi Glitch Subtil (Jeda 2.3s) --- */
-        @keyframes logoGlitch {
-            /* Keadaan Normal / Stabil: 77% dari 3 detik = 2.31 detik */
-            0%, 77%, 100% { 
-                filter: none;
-                transform: translateX(0);
+            0% { 
+                transform: translateY(0px) scale(1); 
             }
-
-            /* --- Momen Glitch Subtil Dimulai --- */
-
-            /* Flicker 1: Pergeseran horizontal kecil */
-            78% {
-                filter: drop-shadow(1px 0 0 var(--glitch-red));
-                transform: translateX(-1px); 
+            50% { 
+                transform: translateY(-10px) scale(1.01); 
             }
-
-            /* Distorsi Kecil 2: Pergeseran kromatik dan sedikit distorsi vertikal */
-            81% {
-                filter: drop-shadow(-2px 0 0 var(--glitch-green)) 
-                        drop-shadow(2px 0 0 var(--glitch-red)) 
-                        contrast(110%); 
-                transform: translateX(1px) scaleY(1.01); 
-            }
-            
-            /* Flicker 3: Pergeseran cepat ke warna lain */
-            84%, 87% {
-                filter: drop-shadow(0 1px 0 var(--glitch-blue)) hue-rotate(5deg);
-                transform: translateY(1px);
-            }
-
-            /* Distorsi Vertikal Minor */
-            92% {
-                filter: drop-shadow(0 2px 0 var(--glitch-green)) 
-                        drop-shadow(0 -2px 0 var(--glitch-red));
-                transform: scaleY(1.02); 
-            }
-
-            /* Pulih Cepat */
-            95% {
-                filter: none;
-                transform: translateX(0);
+            100% { 
+                transform: translateY(0px) scale(1); 
             }
         }
 
@@ -154,7 +104,9 @@
 </head>
 <body>
     <div class="welcome-area">
-        <img src="logo.png" alt="Logo Digital" class="profile-pic">
+        <div class="profile-pic-wrapper">
+            <img src="logo.png" alt="Logo Digital" class="profile-pic">
+        </div>
     </div>
 </body>
 </html>
