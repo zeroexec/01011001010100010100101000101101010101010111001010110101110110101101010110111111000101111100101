@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Datang - Glitch Jeda 2.3s</title>
+    <title>Logo Glitch Subtil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* * --- Variabel & Reset ---
          */
         :root {
             --dark-bg: #030408; 
-            --dark-text: #e0e0e0;
             --accent-cyan: #00e6e6; 
-            --accent-glow: rgba(0, 230, 230, 0.7);
-            --profile-border: #00e6e6;
+            --accent-glow: rgba(0, 230, 230, 0.5); /* Glow lebih redup */
             --glitch-red: #ff00ff; 
             --glitch-green: #00ff00; 
+            --glitch-blue: #00ffff;
         }
 
         * {
@@ -27,8 +27,6 @@
          */
         body {
             background-color: var(--dark-bg);
-            color: var(--dark-text);
-            font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -45,8 +43,8 @@
             width: 100%;
             height: 100%;
             background: repeating-linear-gradient(
-                #00000022, 
-                #00000022 1px, 
+                #0000001a, /* Garis lebih halus */
+                #0000001a 1px, 
                 transparent 1px, 
                 transparent 2px
             );
@@ -54,138 +52,109 @@
             opacity: 0.1;
             animation: backgroundShift 30s linear infinite; 
         }
+        
+        @keyframes backgroundShift {
+            from { background-position: 0 0; }
+            to { background-position: 0 100%; }
+        }
 
-        /* * --- Container Utama (Minimal) ---
+        /* * --- Container Utama ---
          */
         .welcome-area {
             text-align: center;
-            padding: 20px;
-            max-width: 700px;
             z-index: 10;
             opacity: 0;
-            transform: scale(0.8) translateY(20px);
+            transform: scale(0.8);
             animation: areaEntrance 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
         }
 
-        /* * --- Foto Profil (Mengambang) ---
+        /* * --- Logo (Tanpa Border, Tanpa Shadow, Glitch Subtil) ---
          */
         .profile-pic {
-            width: 150px;
-            height: 150px;
+            width: 180px; 
+            height: 180px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid var(--profile-border);
-            box-shadow: 0 0 20px var(--accent-glow);
-            margin-bottom: 30px;
+            /* Dihapus: border */
+            /* Dihapus: box-shadow (untuk kondisi normal) */
             display: block;
-            margin-left: auto;
-            margin-right: auto;
             
             opacity: 0;
             transform: scale(0.5);
+            
             animation: 
-                profileEntrance 1s ease-out forwards 0.8s, 
-                profileFloat 4s ease-in-out infinite 2s; 
-        }
-
-        /* * --- Judul (Glitch) ---
-         */
-        h1 {
-            font-size: 4em;
-            font-weight: 600;
-            color: var(--accent-cyan);
-            text-shadow: 0 0 20px var(--accent-glow);
-            margin-bottom: 0; 
-            letter-spacing: 3px;
-            opacity: 0;
-            transform: translateY(20px);
-            /* Siklus 3 detik (2.3 detik stabil + 0.7 detik glitch) */
-            animation: textRise 1s ease-out forwards 1.2s, 
-                       h1IdleFlicker 3s step-end infinite 2s; /* <-- Durasi total 3 detik */
+                profileEntrance 1s ease-out forwards 0.8s, /* Masuk */
+                profileFloat 4s ease-in-out infinite 2s,  /* Mengambang */
+                logoGlitch 3s step-end infinite 2s;       /* Glitch Jeda 2.3s */
         }
 
         /* * --- Keyframes Animasi ---
          */
         
         @keyframes areaEntrance {
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         @keyframes profileEntrance {
             to { opacity: 1; transform: scale(1); }
         }
 
-        @keyframes textRise {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        /* Mengubah ProfileFloat: Hanya Mengambang, Tanpa Shadow Berlebihan */
         @keyframes profileFloat {
-            0% { transform: translateY(0px) scale(1); box-shadow: 0 0 20px var(--accent-glow); }
-            50% { transform: translateY(-10px) scale(1.02); box-shadow: 0 0 30px var(--accent-cyan); }
-            100% { transform: translateY(0px) scale(1); box-shadow: 0 0 20px var(--accent-glow); }
+            0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
+            50% { transform: translateY(-8px) scale(1.01); filter: drop-shadow(0 0 10px var(--accent-cyan)); }
+            100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
         }
 
-        /* --- Animasi Glitch Tepat Jeda 2.3s untuk H1 --- */
-        @keyframes h1IdleFlicker {
+        /* --- Animasi Glitch Subtil (Jeda 2.3s) --- */
+        @keyframes logoGlitch {
             /* Keadaan Normal / Stabil: 77% dari 3 detik = 2.31 detik */
             0%, 77%, 100% { 
-                text-shadow: 0 0 20px var(--accent-glow), 0 0 5px var(--accent-cyan);
+                filter: none;
                 transform: translateX(0);
-                opacity: 1;
             }
 
-            /* --- Momen Glitch Dimulai (Cepat, dalam rentang 77% hingga 100%) --- */
+            /* --- Momen Glitch Subtil Dimulai --- */
 
-            /* Flicker Cepat 1 */
+            /* Flicker 1: Pergeseran horizontal kecil */
             78% {
-                text-shadow: -3px 0 0 var(--glitch-red), 3px 0 0 var(--glitch-green); 
-                transform: translateX(-2px); 
-                opacity: 0.8;
+                filter: drop-shadow(1px 0 0 var(--glitch-red));
+                transform: translateX(-1px); 
             }
 
-            /* Distorsi Besar */
+            /* Distorsi Kecil 2: Pergeseran kromatik dan sedikit distorsi vertikal */
             81% {
-                text-shadow: 
-                    12px 0 2px var(--glitch-red), 
-                    -12px 0 2px var(--glitch-green); 
-                transform: translateX(-6px) skewX(6deg) scaleY(1.07); 
-                opacity: 0.3; 
+                filter: drop-shadow(-2px 0 0 var(--glitch-green)) 
+                        drop-shadow(2px 0 0 var(--glitch-red)) 
+                        contrast(110%); 
+                transform: translateX(1px) scaleY(1.01); 
             }
             
-            /* Flicker Cepat 2 */
+            /* Flicker 3: Pergeseran cepat ke warna lain */
             84%, 87% {
-                text-shadow: 
-                    -2px 0 0 var(--glitch-red), 
-                    2px 0 0 var(--glitch-green);
-                transform: translateX(1px);
-                opacity: 0.7;
+                filter: drop-shadow(0 1px 0 var(--glitch-blue)) hue-rotate(5deg);
+                transform: translateY(1px);
             }
 
-            /* Distorsi Vertikal */
+            /* Distorsi Vertikal Minor */
             92% {
-                text-shadow: 
-                    6px 0 0 var(--glitch-green), 
-                    -6px 0 0 var(--glitch-red), 
-                    0 0 60px var(--accent-cyan);
-                transform: translateX(3px) scaleY(1.08); 
+                filter: drop-shadow(0 2px 0 var(--glitch-green)) 
+                        drop-shadow(0 -2px 0 var(--glitch-red));
+                transform: scaleY(1.02); 
             }
 
-            /* Pulih Cepat ke Normal sebelum siklus selesai */
+            /* Pulih Cepat */
             95% {
-                text-shadow: 0 0 20px var(--accent-glow);
+                filter: none;
                 transform: translateX(0);
-                opacity: 1;
             }
         }
 
     </style>
-    
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="welcome-area">
-        <img src="1.png" alt="Foto Profil Digital" class="profile-pic">
-        <h1>SISTEM AKTIF</h1>
+        <img src="logo.png" alt="Logo Digital" class="profile-pic">
     </div>
 </body>
 </html>
