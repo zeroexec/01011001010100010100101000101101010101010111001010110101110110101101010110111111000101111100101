@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Animasi Elegan</title>
+    <title>Logo Animasi Garis Luar</title>
     <style>
         /* * --- Variabel ---
          */
         :root {
             --dark-bg: #030408; 
+            --outline-color: #f3f4f6; /* Warna Garis Luar */
+            --outline-width: 3px;     /* Tebal Garis Luar */
             --circle-size: 250px; 
             --float-duration: 3.5s; 
-            --entrance-duration: 1.5s; /* Durasi masuk diperpanjang */
-            --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); /* Kurva elegan (slow-out) */
+            --entrance-duration: 1.5s; 
+            --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); 
         }
 
         * {
@@ -40,11 +42,10 @@
             z-index: 10;
             opacity: 0;
             transform: scale(0.8);
-            /* Animasi Masuk Utama: Menggunakan kurva baru dan durasi lebih lama */
             animation: areaEntrance var(--entrance-duration) var(--entrance-curve) forwards; 
         }
 
-        /* * --- Wrapper Lingkaran ---
+        /* * --- Wrapper Lingkaran (HANYA GARIS LUAR) ---
          */
         .profile-pic-wrapper {
             width: var(--circle-size); 
@@ -53,30 +54,35 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: white; 
             
+            /* --- PERUBAHAN UTAMA: Menghilangkan Background & Menambahkan Border --- */
+            background-color: transparent; /* Hilangkan isian bulatan */
+            border: var(--outline-width) solid var(--outline-color); /* Garis luar putih */
+            
+            overflow: hidden; /* Penting untuk memastikan gambar terpotong lingkaran */
+
             opacity: 0;
             transform: scale(0.5);
             
-            /* Animasi Masuk Logo: Menggunakan kurva baru dan durasi lebih lama, dengan delay */
             animation: 
                 profileEntrance 1.2s var(--entrance-curve) forwards 0.5s, 
-                profileFloat var(--float-duration) ease-in-out infinite 1.7s; /* Delay floating disesuaikan */
+                profileFloat var(--float-duration) ease-in-out infinite 1.7s; 
             
-            filter: none;
+            filter: none; /* Pastikan tidak ada shadow/glow */
         }
 
         /* * --- Gambar di Dalam Wrapper ---
          */
         .profile-pic {
+            /* Gambar mengisi 100% dari area lingkaran */
             width: 100%; 
             height: 100%;
-            border-radius: 50%; 
+            border-radius: 50%; /* Memastikan gambar dipotong sesuai border wrapper */
             object-fit: cover;
             display: block;
         }
 
-        /* * --- Keyframes Animasi ---
+        /* * --- Keyframes Animasi (Tidak Berubah) ---
          */
         
         @keyframes areaEntrance {
@@ -87,7 +93,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Animasi Mengambang Murni */
         @keyframes profileFloat {
             0% { 
                 transform: translateY(0px) scale(1); 
