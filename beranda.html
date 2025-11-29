@@ -3,158 +3,856 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Glitch Subtil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Velion</title>
+    <link rel="icon" href="logo.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+        
+        // --- Konfigurasi Firebase Anda (TIDAK DIUBAH) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCba6M_spBXvuG91Zn-XJ4bSTX6vNcST0",
+            authDomain: "index-68220.firebaseapp.com",
+            databaseURL: "https://index-68220-default-rtdb.firebaseio.com",
+            projectId: "index-68220",
+            storageBucket: "index-68220.firebasestorage.app",
+            messagingSenderId: "633087068802",
+            appId: "1:633087068802:web:f8aa1f2ef9c00b99d1429b",
+            measurementId: "G-2VQCRFJQCM"
+        };
+        
+        const SAFE_APP_ID = 'user-shortcuts'; 
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        const shortcutRef = ref(db, 'artifacts/' + SAFE_APP_ID + '/shortcuts/list');
+
+        let shortcutsData = {};
+        
+        // --- VARIABEL GLOBAL ---
+        const body = document.getElementById('body');
+        const mainContentContainer = document.getElementById('mainContentContainer');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const edgeTrigger = document.getElementById('edge-trigger');
+        const mainNavLinks = document.querySelectorAll('#main-nav a'); 
+        
+        const iframeContainer = document.getElementById('iframe-container');
+        let appFrames = document.querySelectorAll('.app-frame'); 
+        
+        const staticFrames = document.querySelectorAll('#iframe-container > .app-frame:not([data-dynamic="true"])');
+
+        let isInitialLoadDone = false; 
+        
+        const sidebarHeader = document.querySelector('.sidebar-header'); 
+        const hamburgerButton = document.getElementById('hamburger-btn'); 
+        
+        const ACTIVE_KEY = 'activePageUrl'; 
+        const DEFAULT_URL = 'https://artsite07.github.io/Ak29238928h92398/home.html'; 
+        const SIDEBAR_OPEN_CLASS = 'sidebar-open';
+        const SIDEBAR_LOCKED_CLASS = 'sidebar-locked'; 
+        
+        const isSmallScreen = () => window.matchMedia('(max-width: 992px)').matches;
+
+        function openSidebar() {
+            if (isSmallScreen() || (!body.classList.contains(SIDEBAR_LOCKED_CLASS) && !body.classList.contains(SIDEBAR_OPEN_CLASS))) {
+                body.classList.add(SIDEBAR_OPEN_CLASS);
+                mainContentContainer.style.pointerEvents = 'none'; 
+            }
+        }
+
+        function closeSidebar() {
+            if (body.classList.contains(SIDEBAR_OPEN_CLASS) && (!body.classList.contains(SIDEBAR_LOCKED_CLASS) || isSmallScreen())) {
+                body.classList.remove(SIDEBAR_OPEN_CLASS);
+                setTimeout(() => {
+                    mainContentContainer.style.pointerEvents = 'auto';
+                }, 350); 
+            }
+        }
+
+        function toggleSidebarLock() {
+            if (isSmallScreen()) return; 
+
+            if (body.classList.contains(SIDEBAR_LOCKED_CLASS)) {
+                body.classList.remove(SIDEBAR_LOCKED_CLASS);
+                closeSidebar(); 
+            } else {
+                body.classList.add(SIDEBAR_LOCKED_CLASS);
+                body.classList.add(SIDEBAR_OPEN_CLASS); 
+                mainContentContainer.style.pointerEvents = 'auto'; 
+            }
+        }
+
+        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: Dynamic Frame Selalu Dimuat Ulang) ---
+        const setActiveState = (newUrl, element) => {
+            document.querySelectorAll('#sidebar a').forEach(l => {
+                l.classList.remove('active');
+                l.removeAttribute('aria-current');
+            });
+            
+            if (element) {
+                element.classList.add('active');
+                element.setAttribute('aria-current', 'page');
+            }
+            
+            let targetFrame = document.querySelector(`.app-frame[data-url="${newUrl}"]`);
+
+            if (targetFrame) {
+                
+                // 1. Sembunyikan dan RESET SEMUA FRAME yang TIDAK AKTIF
+                appFrames.forEach(frame => {
+                    // Cek apakah frame adalah frame dinamis (More Application) dan bukan yang baru diklik
+                    if (frame.dataset.dynamic === "true" && frame !== targetFrame) {
+                         // **RESET**: Atur SRC frame dinamis yang tidak aktif kembali ke about:blank
+                         frame.src = 'about:blank'; 
+                    }
+                    frame.classList.remove('active');
+                });
+
+                // 2. Jika frame belum dimuat (src masih about:blank) ATAU frame dinamis, muat sekarang.
+                if (targetFrame.src === 'about:blank' || targetFrame.src.startsWith('about:blank') || targetFrame.dataset.dynamic === "true") {
+                    // Muat frame, memicu reset jika frame dinamis
+                    targetFrame.src = targetFrame.dataset.url;
+                    
+                    // Listener temporer (opsional)
+                    targetFrame.onload = () => {
+                         targetFrame.onload = null;
+                    };
+                }
+
+                // 3. Tampilkan frame yang dituju
+                targetFrame.classList.add('active');
+            }
+            
+            // 4. Muat frame statis yang belum dimuat pada klik navigasi pertama
+            if (!isInitialLoadDone) {
+                staticFrames.forEach(frame => {
+                    if (frame.src === 'about:blank') {
+                        frame.src = frame.dataset.url;
+                    }
+                });
+                isInitialLoadDone = true; 
+            }
+            
+            history.replaceState(null, '', newUrl);
+            sessionStorage.setItem(ACTIVE_KEY, newUrl);
+        };
+
+        // --- FUNGSI LAINNYA (Tidak diubah, termasuk setupFrameListeners menjadi placeholder) ---
+        function setupFrameListeners() {
+            // Placeholder, tidak ada loading screen, logika loading pindah ke setActiveState
+        }
+
+        function startRealtimeListener() {
+            onValue(shortcutRef, (snapshot) => {
+                shortcutsData = snapshot.val() || {};
+                renderShortcuts();
+            }, (error) => {
+                console.error("Error membaca data RTDB:", error);
+                document.getElementById('app-grid-dynamic').innerHTML = 
+                    '<p style="color:red; font-weight:bold; padding: 10px; font-size: 0.8rem; text-align:center;">Gagal memuat data shortcut.</p>';
+                setupFrameListeners(); 
+                initializeActiveState();
+            });
+        }
+
+        function renderShortcuts() {
+            const grid = document.getElementById('app-grid-dynamic');
+            grid.innerHTML = ''; 
+            
+            document.querySelectorAll('.app-frame[data-dynamic="true"]').forEach(f => f.remove());
+            
+            const keys = Object.keys(shortcutsData);
+            
+            const sortedKeys = keys.sort((a, b) => {
+                const orderA = shortcutsData[a].order === undefined ? Infinity : shortcutsData[a].order;
+                const orderB = shortcutsData[b].order === undefined ? Infinity : shortcutsData[b].order;
+                return orderA - orderB;
+            });
+
+            if (sortedKeys.length > 0) {
+                 const separator = document.createElement('div');
+                 separator.className = 'separator-title';
+                 separator.textContent = 'MORE TOOLS'; 
+                 grid.appendChild(separator);
+            }
+
+            const fragment = document.createDocumentFragment();
+
+            sortedKeys.forEach((key) => {
+                const item = shortcutsData[key];
+                
+                // 1. BUAT IFRAME DINAMIS - SRC tetap about:blank
+                const dynamicIframe = document.createElement('iframe');
+                dynamicIframe.id = `dynamic-frame-${key}`; 
+                dynamicIframe.className = 'app-frame';
+                dynamicIframe.src = 'about:blank'; // MUAT SAAT DIKLIK
+                dynamicIframe.dataset.url = item.url;
+                dynamicIframe.dataset.dynamic = "true"; // Penanda frame dinamis
+                dynamicIframe.title = item.name;
+                iframeContainer.appendChild(dynamicIframe); 
+
+                // 2. BUAT LINK NAVIGASI
+                const appItem = document.createElement('a');
+                appItem.href = '#'; 
+                appItem.setAttribute('data-url', item.url);
+                appItem.title = item.name;
+                appItem.onclick = (e) => {
+                    e.preventDefault();
+                    setActiveState(item.url, appItem); 
+                    if (!body.classList.contains(SIDEBAR_LOCKED_CLASS) || isSmallScreen()) {
+                        closeSidebar();
+                    }
+                };
+                
+                appItem.className = 'dynamic-app-item';
+                appItem.innerHTML = `
+                    <i class="fa-solid fa-cube"></i>
+                    <span>${item.name}</span>
+                `;
+                fragment.appendChild(appItem);
+            });
+            
+            grid.appendChild(fragment); 
+            
+            appFrames = document.querySelectorAll('.app-frame'); 
+
+            setupFrameListeners();
+            initializeActiveState();
+        }
+
+        function initializeActiveState() {
+            const savedUrl = sessionStorage.getItem(ACTIVE_KEY);
+            
+            let initialUrl = DEFAULT_URL;
+            let initialLink;
+
+            if (savedUrl) {
+                initialLink = document.querySelector(`[data-url="${savedUrl}"]`) || document.querySelector(`[href="${savedUrl}"]`);
+            }
+            
+            if (!initialLink) {
+                 initialLink = document.querySelector(`[href="${DEFAULT_URL}"]`);
+                 initialUrl = DEFAULT_URL;
+            } else {
+                 initialUrl = initialLink.getAttribute('href') || initialLink.dataset.url;
+            }
+            
+            setActiveState(initialUrl, initialLink);
+            closeSidebar();
+        }
+
+        // FUNGSI HANDLELOGOUT DIHAPUS
+
+        window.onload = () => {
+             // 1. Listener Sidebar Kiri (Hover/Mobile)
+             edgeTrigger.addEventListener('mouseenter', openSidebar);
+             sidebarOverlay.addEventListener('click', closeSidebar);
+             
+             if (hamburgerButton) {
+                 hamburgerButton.addEventListener('click', openSidebar);
+             }
+
+             if (sidebarHeader) {
+                 sidebarHeader.addEventListener('click', toggleSidebarLock); 
+             }
+             
+             // Listener untuk link navigasi statis
+             mainNavLinks.forEach(link => {
+                 link.addEventListener('click', e => {
+                     e.preventDefault();
+                     const newUrl = link.getAttribute('href'); 
+                     setActiveState(newUrl, link); 
+                     if (!body.classList.contains(SIDEBAR_LOCKED_CLASS) || isSmallScreen()) {
+                        closeSidebar();
+                     }
+                 });
+             });
+             
+             // LOGOUT BUTTON LISTENER DIHAPUS
+             
+             window.addEventListener('resize', () => {
+                 if (isSmallScreen() && body.classList.contains(SIDEBAR_LOCKED_CLASS)) {
+                     body.classList.remove(SIDEBAR_LOCKED_CLASS);
+                 }
+                 if (!isSmallScreen() && body.classList.contains(SIDEBAR_OPEN_CLASS) && !body.classList.contains(SIDEBAR_LOCKED_CLASS)) {
+                     closeSidebar();
+                 }
+             });
+             
+             // 2. Listener Iframe dan Firebase
+             startRealtimeListener(); 
+        };
+    </script>
+    
     <style>
-        /* * --- Variabel & Reset ---
-         */
+        /* Variabel Warna dan Font */
         :root {
-            --dark-bg: #030408; 
-            --accent-cyan: #00e6e6; 
-            --accent-glow: rgba(0, 230, 230, 0.5); /* Glow lebih redup */
-            --glitch-red: #ff00ff; 
-            --glitch-green: #00ff00; 
-            --glitch-blue: #00ffff;
+            --sidebar-width: 280px;
+            --sidebar-border-width: 3px; 
+            --touch-area: 12px;
+            --primary-bg: #000000; 
+            --secondary-bg: #0c0c0c; 
+            --text-color: #f3f4f6;
+            --accent-color: #06b6d4; /* Warna ini hanya sebagai fallback jika gradien tidak didukung */
+            --main-transition-duration: 0.35s;
+            --padding-x: 20px; 
+            
+            /* Warna Shadow tetap dipertahankan untuk item aktif/iframe */
+            --shadow-color: rgba(0, 188, 212, 0.2); 
+            
+            --dynamic-item-bg: #1a1a1a;
+            --dynamic-item-hover: #222222;
+
+            /* Warna Gradien Baru (Minim Hijau, Fokus Biru/Cyan) */
+            --gradient-start: #3498db; /* Biru */
+            --gradient-middle: #00bcd4; /* Cyan */
+            --gradient-end: #00acc1;   /* Sedikit lebih gelap dari Cyan */
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ------------------------------------------------------------------------------------- */
+        /* SCROLLBAR HIDING */
+        /* ------------------------------------------------------------------------------------- */
+        #sidebar nav::-webkit-scrollbar {
+            display: none; 
+        }
+        
+        #sidebar nav {
+            -ms-overflow-style: none; 
+            scrollbar-width: none; 
         }
 
-        /* * --- Gaya Halaman & Efek Background ---
-         */
+        /* ------------------------------------------------------------------------------------- */
+        /* Layout utama */
+        /* ------------------------------------------------------------------------------------- */
         body {
-            background-color: var(--dark-bg);
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #008B8B; 
+            height: 100vh;
+            overflow: hidden; 
+            overflow-x: hidden; 
+            transition: background-color 0.5s ease;
+        }
+        
+        /* HEADER MOBILE (Default: Hidden) */
+        #mobile-header {
+            display: none; /* Default tersembunyi */
+        }
+
+        /* Area pemicu Hover (Trigger) - Desktop Only */
+        #edge-trigger {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--touch-area);
+            z-index: 3000;
+            cursor: pointer;
+        }
+        
+        /* Indikator Pemicu */
+        #edge-trigger::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1px;
+            transition: background-color 0.2s ease, width 0.2s ease;
+        }
+
+        /* Menggunakan warna gradien pada trigger hover */
+        #edge-trigger:hover::after {
+            /* Gradasi dari tengah ke ujung */
+            background: linear-gradient(to top, var(--gradient-start), var(--gradient-end));
+            width: 3px;
+        }
+
+        /* ------------------------------------------------------------------------------------- */
+        /* Sidebar (Elemen Navigasi) */
+        /* ------------------------------------------------------------------------------------- */
+        #sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100%;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            z-index: 2000;
+            padding: 0;
+            
+            transform: translateX(calc(-1 * (var(--sidebar-width) + var(--sidebar-border-width))));
+            
+            transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+            /* Border sidebar menggunakan gradien dari atas ke bawah */
+            border-right: var(--sidebar-border-width) solid; 
+            border-image: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end)) 1;
+            
             display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+            flex-direction: column;
+        }
+
+        /* Header/Profil Sidebar (Desktop) */
+        .sidebar-header {
+            padding: 30px var(--padding-x) 20px;
+            border-bottom: 1px solid var(--secondary-bg);
+            margin-bottom: 10px;
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            cursor: pointer; 
             position: relative;
         }
+        
+        /* Indikator Kunci Visual (Opsional) */
+        .sidebar-header::after {
+            content: 'CLICK TO LOCK';
+            position: absolute;
+            bottom: 5px; 
+            right: var(--padding-x);
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.3s ease;
+        }
 
-        body::after {
-            content: '';
+        .sidebar-locked .sidebar-header::after {
+            content: 'LOCKED';
+            /* Warna solid untuk teks kecil agar mudah dibaca */
+            color: var(--gradient-end); 
+        }
+
+        .profile-image {
+            width: 40px; 
+            height: 40px;
+            border-radius: 50%; 
+            object-fit: cover; 
+            /* Perubahan: Menghapus border dan shadow */
+            border: none; 
+            box-shadow: none; 
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            /* Aplikasi Gradien ke Judul H1 */
+            background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; 
+        }
+
+        /* Kontainer Navigasi Utama */
+        #sidebar nav {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 var(--padding-x);
+            overflow-y: scroll; 
+            /* Menambahkan padding di bagian bawah agar item terakhir tidak terpotong */
+            padding-bottom: 40px; 
+        }
+
+        /* Styling Umum Link (Statis & Dinamis) */
+        #sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.6, 1);
+            font-weight: 500;
+        }
+
+        #sidebar a i {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease;
+        }
+
+        /* Hover State */
+        #sidebar a:hover {
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            transform: translateX(3px);
+        }
+
+        /* Menggunakan warna gradien pada icon hover */
+        #sidebar a:hover i {
+             background: linear-gradient(to top, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; 
+        }
+
+        /* Active State */
+        #sidebar a.active {
+            /* Gradasi untuk background item aktif */
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end)); 
+            color: var(--primary-bg); 
+            font-weight: 700;
+            box-shadow: 0 4px 10px var(--shadow-color); 
+        }
+
+        #sidebar a.active i {
+            color: var(--primary-bg); 
+        }
+
+        /* Styling Kontainer Dynamic Grid */
+        #app-grid-dynamic {
+             display: flex;
+             flex-direction: column;
+             gap: 5px;
+             margin-top: 15px; 
+             padding-top: 10px;
+             border-top: 1px solid var(--secondary-bg);
+        }
+        
+        .separator-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 5px var(--padding-x); 
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            /* Aplikasi Gradien ke Judul Separator */
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent; 
+        }
+        
+        /* Styling Khusus Link Dinamis */
+        .dynamic-app-item {
+             padding: 8px 15px; 
+             background-color: var(--dynamic-item-bg);
+        }
+        
+        .dynamic-app-item:hover {
+             background-color: var(--dynamic-item-hover);
+        }
+        
+        /* Footer/Logout Button - Sudah dihapus, tapi menyisakan CSS untuk struktur footer jika ada */
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 0; /* Padding diatur di #sidebar nav */
+        }
+
+
+        /* ------------------------------------------------------------------------------------- */
+        /* Area Konten Utama */
+        /* ------------------------------------------------------------------------------------- */
+        #mainContentContainer {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+            transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* GAYA BARU UNTUK SEMUA IFRAME APLIKASI (CACHE LOGIC) */
+        .app-frame {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(
-                #0000001a, /* Garis lebih halus */
-                #0000001a 1px, 
-                transparent 1px, 
-                transparent 2px
-            );
-            pointer-events: none; 
-            opacity: 0.1;
-            animation: backgroundShift 30s linear infinite; 
-        }
-        
-        @keyframes backgroundShift {
-            from { background-position: 0 0; }
-            to { background-position: 0 100%; }
-        }
-
-        /* * --- Container Utama ---
-         */
-        .welcome-area {
-            text-align: center;
+            border: none;
+            background-color: var(--primary-bg);
+            opacity: 0; /* Sembunyikan secara default */
             z-index: 10;
-            opacity: 0;
-            transform: scale(0.8);
-            animation: areaEntrance 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+            transition: opacity 0.3s ease;
+            pointer-events: none; /* Nonaktifkan interaksi saat tersembunyi */
         }
 
-        /* * --- Logo (Tanpa Border, Tanpa Shadow, Glitch Subtil) ---
-         */
-        .profile-pic {
-            width: 180px; 
-            height: 180px;
-            border-radius: 50%;
-            object-fit: cover;
-            /* Dihapus: border */
-            /* Dihapus: box-shadow (untuk kondisi normal) */
-            display: block;
-            
-            opacity: 0;
-            transform: scale(0.5);
-            
-            animation: 
-                profileEntrance 1s ease-out forwards 0.8s, /* Masuk */
-                profileFloat 4s ease-in-out infinite 2s,  /* Mengambang */
-                logoGlitch 3s step-end infinite 2s;       /* Glitch Jeda 2.3s */
+        .app-frame.active {
+            opacity: 1; /* Tampilkan iframe yang aktif */
+            z-index: 11;
+            pointer-events: auto; /* Aktifkan interaksi saat aktif */
         }
-
-        /* * --- Keyframes Animasi ---
-         */
         
-        @keyframes areaEntrance {
-            to { opacity: 1; transform: scale(1); }
+        /* REVEAL LOGIC (Mode Hover) */
+        .sidebar-open #sidebar {
+            transform: translateX(0);
         }
 
-        @keyframes profileEntrance {
-            to { opacity: 1; transform: scale(1); }
+        .sidebar-open #mainContentContainer {
+            transform: translateX(calc(var(--sidebar-width) - 50px)); /* Dorongan parsial saat hover */
+            filter: brightness(0.6); 
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+            pointer-events: none; /* Nonaktifkan klik saat hover terbuka */
+        }
+        
+        /* Overlay Transparan (Untuk menutup klik luar) */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            height: 100%;
+            background: transparent;
+            z-index: 1999; 
+            display: none;
+        }
+        
+        .sidebar-open .sidebar-overlay {
+            display: block;
+        }
+        
+        /* LOGIKA TERKUNCI (Mode Permanen - Desktop Only) */
+        .sidebar-locked #mainContentContainer {
+            /* Konten Utama menyesuaikan dan mengambil sisa ruang */
+            transform: translateX(var(--sidebar-width)); 
+            width: calc(100% - var(--sidebar-width)); 
+            left: 0;
+            filter: brightness(1); /* Hapus filter redup */
+            box-shadow: none;
+            pointer-events: auto; /* Izinkan interaksi */
+            
+            transition: transform var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        width var(--main-transition-duration) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+            /* GAYA KOTAK BERUJUNG BULAT - CONTAINER */
+            padding: 20px; 
+            height: 100vh; 
+            box-sizing: border-box; 
+            overflow: hidden; 
         }
 
-        /* Mengubah ProfileFloat: Hanya Mengambang, Tanpa Shadow Berlebihan */
-        @keyframes profileFloat {
-            0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
-            50% { transform: translateY(-8px) scale(1.01); filter: drop-shadow(0 0 10px var(--accent-cyan)); }
-            100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 5px var(--accent-glow)); }
+        .sidebar-locked #iframe-container {
+             /* Pastikan iframe container mengambil 100% dari parent (mainContentContainer) */
+             width: 100%; 
+             height: 100%; 
         }
 
-        /* --- Animasi Glitch Subtil (Jeda 2.3s) --- */
-        @keyframes logoGlitch {
-            /* Keadaan Normal / Stabil: 77% dari 3 detik = 2.31 detik */
-            0%, 77%, 100% { 
-                filter: none;
-                transform: translateX(0);
-            }
+        .sidebar-locked .app-frame {
+            /* Frame menyesuaikan lebar container */
+            width: 100%; 
+            height: 100%; 
+            position: absolute; /* Tetap absolute di dalam iframe-container */
+            
+            /* GAYA KOTAK BERUJUNG BULAT - IFRAME */
+            border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden; 
+        }
 
-            /* --- Momen Glitch Subtil Dimulai --- */
 
-            /* Flicker 1: Pergeseran horizontal kecil */
-            78% {
-                filter: drop-shadow(1px 0 0 var(--glitch-red));
-                transform: translateX(-1px); 
-            }
+        .sidebar-locked #sidebar {
+            transform: translateX(0); /* Pastikan sidebar terlihat penuh */
+        }
+        
+        /* Sembunyikan pemicu tepi (hover) saat terkunci */
+        .sidebar-locked #edge-trigger {
+            pointer-events: none;
+            display: none;
+        }
 
-            /* Distorsi Kecil 2: Pergeseran kromatik dan sedikit distorsi vertikal */
-            81% {
-                filter: drop-shadow(-2px 0 0 var(--glitch-green)) 
-                        drop-shadow(2px 0 0 var(--glitch-red)) 
-                        contrast(110%); 
-                transform: translateX(1px) scaleY(1.01); 
+        /* Sembunyikan overlay saat terkunci */
+        .sidebar-locked .sidebar-overlay {
+            display: none;
+        }
+
+
+        /* ------------------------------------------------------------------------------------- */
+        /* MEDIA QUERY: LAYAR KECIL (MOBILE/TABLET) */
+        /* ------------------------------------------------------------------------------------- */
+        @media (max-width: 992px) {
+            #mobile-header {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 60px; 
+                background-color: var(--primary-bg);
+                border-bottom: 1px solid var(--secondary-bg);
+                z-index: 1500;
+                /* Gunakan padding 0 horizontal agar elemen paling kiri dan kanan (hamburger dan logo) 
+                   tetap menempel di pinggir. Kita akan atur jaraknya pada elemen itu sendiri. */
+                padding: 0; 
+                align-items: center;
+                justify-content: space-between;
             }
             
-            /* Flicker 3: Pergeseran cepat ke warna lain */
-            84%, 87% {
-                filter: drop-shadow(0 1px 0 var(--glitch-blue)) hue-rotate(5deg);
-                transform: translateY(1px);
+            #mobile-header .menu-icon, #mobile-header .profile-link {
+                /* Icon mobile header juga menggunakan gradien */
+                background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                color: transparent; 
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+                height: 100%;
+                margin: 0; 
             }
 
-            /* Distorsi Vertikal Minor */
-            92% {
-                filter: drop-shadow(0 2px 0 var(--glitch-green)) 
-                        drop-shadow(0 -2px 0 var(--glitch-red));
-                transform: scaleY(1.02); 
+            /* Gaya khusus untuk tombol hamburger */
+            #hamburger-btn {
+                background-color: var(--primary-bg); 
+                border: none;
+                padding: 8px 12px; 
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                /* Perbaikan: Tambahkan jarak dari pinggir kiri */
+                margin-left: var(--padding-x); 
             }
 
-            /* Pulih Cepat */
-            95% {
-                filter: none;
+            #hamburger-btn:hover {
+                background-color: var(--secondary-bg); 
+            }
+            
+            /* Kontainer Logo/Profile Link */
+            #mobile-header .profile-link {
+                 /* Perbaikan: Tambahkan jarak dari pinggir kanan */
+                 padding-right: var(--padding-x); 
+            }
+            
+            #mobile-header .profile-link .profile-image {
+                width: 35px;
+                height: 35px;
+                margin-left: 0; 
+                /* Menghapus border dan shadow */
+                border: none;
+                box-shadow: none;
+            }
+            
+            #mainContentContainer {
+                margin-top: 60px; 
+                height: calc(100% - 60px);
+            }
+            
+            #edge-trigger {
+                 display: none;
+            }
+
+            .sidebar-locked {
+                height: 100vh !important; 
+                overflow: hidden !important; 
+            }
+
+            .sidebar-open #mainContentContainer {
+                transform: translateX(var(--sidebar-width)); 
+                filter: brightness(0.6); 
+                box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+            }
+            
+            .sidebar-header {
+                cursor: default; 
+            }
+            
+            .sidebar-header::after {
+                display: none;
+            }
+            
+            .sidebar-locked #mainContentContainer {
                 transform: translateX(0);
+                width: 100%;
+                padding: 0;
+            }
+            
+            .sidebar-locked .app-frame {
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+                box-shadow: none;
             }
         }
-
     </style>
 </head>
-<body>
-    <div class="welcome-area">
-        <img src="logo.png" alt="Logo Digital" class="profile-pic">
+<body id="body">
+    
+    <header id="mobile-header">
+        <button id="hamburger-btn" class="menu-icon" aria-label="Buka Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <a href="#" class="profile-link">
+             <img src="logo.png" alt="Profil" class="profile-image">
+        </a>
+    </header>
+    
+    <div id="edge-trigger"></div>
+
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.png" alt="Velion Profile" class="profile-image">
+            <div class="header-content">
+                <h1>Velion</h1>
+                </div>
+        </div>
+        
+        <nav role="navigation">
+            <div id="main-nav">
+                <a href="https://artsite07.github.io/Ak29238928h92398/home.html" data-target="aplikasi-frame" title="Halaman Utama">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </a>
+                <a href="https://zeroexec.github.io/mytools/v-drive" data-target="v-drive-frame" title="Penyimpanan Virtual">
+                    <i class="fa-solid fa-hard-drive"></i>
+                    <span>V-Drive</span>
+                </a>
+                <a href="https://zeroexec.github.io/mytools/codingin" data-target="codingin-frame" title="Terminal Simulasi">
+                    <i class="fa-solid fa-terminal"></i>
+                    <span>Terminal</span>
+                </a>
+            </div>
+
+            <div id="app-grid-dynamic">
+                </div>
+            
+        </nav>
+        
+        <div class="sidebar-footer">
+            </div>
+    </div>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div id="mainContentContainer">
+        <div id="iframe-container" style="width: 100%; height: 100%; position: relative;">
+            
+            <iframe id="home-frame" class="app-frame" src="about:blank" data-url="https://artsite07.github.io/Ak29238928h92398/home.html" title="Halaman Utama">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+            <iframe id="vdrive-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/v-drive" title="Penyimpanan Virtual">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+            <iframe id="terminal-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/codingin" title="Terminal Simulasi">
+                Browser Anda tidak mendukung iframe.
+            </iframe>
+
+        </div>
     </div>
 </body>
 </html>
