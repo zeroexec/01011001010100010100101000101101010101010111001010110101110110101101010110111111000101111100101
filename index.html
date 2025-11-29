@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>error</title>
+    <title>Sistem Akses Bertahap</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -11,30 +11,14 @@
     
     <style>
         :root {
-            --bg-light: black; 
-            --text-dark: red; 
-            --text-secondary: #666666; 
-            --accent-blue: red; 
-            --terminal-bg: black; 
-            --terminal-border: black;
+            --bg-dark: black; 
+            --text-main: #00FF00; 
+            --text-secondary: #008000; 
+            --text-error: #FF0000; 
+            --text-success: #00FFFF; 
             --font-main: 'Roboto Mono', monospace; 
-            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --glitch-duration: 0.2s; 
-            --screen-glitch-duration: 0.03s; 
-            --glitch-color1: #FF00FF; 
-            --glitch-color2: #00FFFF; 
-            --glitch-color3: #FF6600; 
         }
         
-        @keyframes body-shake {
-            0% { transform: translate(1px, 1px); }
-            20% { transform: translate(-1px, 2px); }
-            40% { transform: translate(-2px, -1px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(1px, -2px); }
-            100% { transform: translate(-2px, 1px); }
-        }
-
         body {
             font-family: var(--font-main);
             display: flex;
@@ -43,183 +27,110 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: var(--bg-light); 
-            color: var(--text-dark); 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
             overflow: hidden; 
-            transition: transform 0.05s linear; 
         }
         
-        .shaking {
-            animation: body-shake 0.05s infinite step-end;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px; 
-            padding: 30px; 
+        .terminal-container {
+            width: 90%;
+            max-width: 600px; 
+            padding: 20px 10px; 
             text-align: left;
-            background-color: var(--terminal-bg); 
-            border: 1px solid var(--terminal-border);
-            border-radius: 8px;
-            box-shadow: var(--shadow-subtle);
-            position: relative; 
-            z-index: 10; 
-        }
-        
-        @keyframes danger-blink {
-            0%, 100% { 
-                color: var(--accent-blue); 
-                text-shadow: none;
-            }
-            10%, 30%, 50%, 70%, 90% { 
-                color: white; 
-                text-shadow: 0 0 5px red, 0 0 10px red; 
-            }
-            20%, 40%, 60%, 80% { 
-                color: red; 
-                text-shadow: 0 0 2px var(--accent-blue);
-            }
-        }
-
-        .header-title {
-            font-size: 15px; 
-            font-weight: 700;
-            color: var(--accent-blue);
-            text-align: center;
-            animation: danger-blink 2s infinite step-end;
-        }
-
-        @keyframes glitch-anim {
-            0%, 100% { transform: translate(0); opacity: 1; }
-            15% { transform: translate(-5px, 5px); color: var(--glitch-color1); }
-            30% { transform: translate(5px, -5px); color: var(--glitch-color2); }
-            45% { transform: translate(-3px, 3px); color: var(--glitch-color3); }
-            60% { transform: translate(3px, -3px); color: var(--glitch-color1); }
-            75% { transform: translate(-1px, 1px); color: var(--glitch-color2); }
-        }
-
-        .glitch-effect {
-            animation: glitch-anim var(--glitch-duration) steps(1, end);
-        }
-        
-        .header-title.glitch-effect {
-            text-shadow: 
-                -2px 0 var(--glitch-color1), 
-                2px 0 var(--glitch-color2);
-            animation: none; 
-            color: red;
-        }
-        
-        #glitchOverlay {
-            position: fixed; 
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none; 
-            z-index: 99; 
+            /* --- ANIMASI MASUK BARU --- */
             opacity: 0; 
-            transition: opacity 0.1s ease-out; 
-            background: black; 
+            animation: fadeIn 1.5s ease-out forwards;
         }
 
-        @keyframes screen-glitch-shift {
-            0% { transform: translate(15px, 15px); }
-            20% { transform: translate(-10px, -10px); }
-            40% { transform: translate(20px, -15px); }
-            60% { transform: translate(-15px, 10px); }
-            80% { transform: translate(10px, 20px); }
-            100% { transform: translate(15px, 15px); }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
+        /* ------------------------- */
 
-        .screen-glitch-active {
-            opacity: 0.8; 
-            filter: saturate(2) contrast(1.5); 
-        }
-        
-        .screen-glitch-active::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                90deg, 
-                var(--glitch-color1) 0%, 
-                var(--glitch-color2) 3%, 
-                var(--glitch-color3) 6%
-            ); 
-            opacity: 0.2; 
-            mix-blend-mode: color-dodge; 
+        .output-history {
+            min-height: 50px;
+            max-height: 80vh;
+            overflow-y: scroll; 
+            font-size: 1.1rem;
+            line-height: 1.4;
+            padding-bottom: 5px;
             
-            animation: screen-glitch-shift var(--screen-glitch-duration) infinite step-end;
-            transform: translate(4vw, -4vh) scale(1.1); 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .output-history::-webkit-scrollbar {
+            display: none;
         }
 
-        .screen-glitch-active::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                45deg, 
-                var(--glitch-color1) 0px, 
-                var(--glitch-color2) 1px, 
-                transparent 2px,
-                transparent 4px
-            );
-            opacity: 0.3;
-            mix-blend-mode: overlay; 
-            
-            animation: screen-glitch-shift var(--screen-glitch-duration) infinite step-end reverse;
-            transform: translate(-5vw, 5vh) scale(0.9);
+        .prompt-line {
+            display: flex;
+            gap: 10px;
+            font-size: 1.1rem;
+            color: var(--text-main);
         }
 
-        .header-info {
-            margin-bottom: 20px;
-            border-bottom: 1px dashed var(--terminal-border);
-            padding-bottom: 15px;
+        .prompt-symbol {
+            font-weight: bold;
         }
-        
-        .terminal-output {
-            min-height: 100px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            white-space: pre-wrap;
-            overflow-y: hidden;
-            max-height: 350px; 
+
+        .cursor {
+            display: inline-block;
+            width: 8px; 
+            height: 1.2em;
+            background-color: var(--text-main); 
+            animation: blink 1s step-start infinite;
+            margin-left: 2px;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
         }
 
         .hidden-input {
             position: absolute; 
             top: 0; 
             left: 0; 
-            width: 1px; 
-            height: 1px;
+            width: 100%;
+            height: 100%;
             opacity: 0; 
             z-index: -1; 
         }
         
-        .message-success { color: green; }
-        .message-error { color: blue; }
+        .message-success { color: var(--text-success); }
+        .message-error { color: var(--text-error); }
+        .message-secondary { color: var(--text-secondary); }
+        .message-title { color: white; font-weight: bold; }
 
+        /* --- Gaya Efek Mengetik BARU --- */
+        .typing {
+            overflow: hidden; /* Pastikan teks tidak terlihat sebelum diketik */
+            white-space: nowrap; /* Teks tetap dalam satu baris */
+            width: 0; /* Lebar awal 0 */
+            border-right: 0.15em solid white; /* Efek kursor mengetik */
+            animation: typing 1.5s steps(30, end) forwards;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        /* -------------------------------- */
     </style>
 </head>
 <body>
 
-    <div class="container" id="terminalContainer">
+    <div class="terminal-container" id="terminalContainer">
         
-        <div class="header-info">
-            <div class="header-title" id="glitchTitle"> 
-                Installing a virus for a device...
+        <div class="output-history" id="output">
             </div>
-        </div>
 
-        <div class="terminal-output" id="output">
-            System initialization...
+        <div class="prompt-line">
+            <span class="prompt-symbol" id="promptSymbol">STAGE-1 $</span>
+            <div id="inputDisplay">
+                <span id="maskedInput"></span><span id="cursor" class="cursor"></span>
+            </div>
         </div>
 
         <input 
@@ -227,11 +138,11 @@
             id="passwordInput" 
             class="hidden-input"
             autofocus
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
         >
-
     </div>
-    
-    <div id="glitchOverlay"></div>
     
     <script>
         const firebaseConfig = {
@@ -250,42 +161,54 @@
 
         const input = document.getElementById('passwordInput');
         const output = document.getElementById('output');
-        const glitchTitle = document.getElementById('glitchTitle'); 
-        const glitchOverlay = document.getElementById('glitchOverlay'); 
-        const bodyElement = document.body;
+        const maskedInput = document.getElementById('maskedInput');
+        const promptSymbol = document.getElementById('promptSymbol');
+        const terminalContainer = document.getElementById('terminalContainer');
         const REDIRECT_URL = 'beranda.html'; 
 
         let storedHash = null; 
         let isAuthenticating = false;
+        let currentStage = 1; 
+        const MAX_FAKE_STAGES = 3; 
         
-        const LOOP_TEXTS = [
-            "DNS RESOLUTION FAILED: Attempting IP fallback scan...",
-            "PORT SCANNING INITIATED: Probing ports 21, 22, 23, 445.",
-            "IDENTIFYING OS VERSION: Target system running Windows 10 build 19045.",
-            "ENUMERATING USER ACCOUNTS: Found 4 active user profiles.",
-            "SEARCHING EXPLOIT DATABASE: Matching vulnerability 'EternalBlue'...",
-            "PREPARING INJECTION BUFFER: Shellcode size calculated: 1024 bytes.",
-            "INITIATING SMB EXPLOIT SEQUENCE: Sending fragmented packets.",
-            "BUFFER OVERFLOW SUCCESSFUL: JUMP ADDRESS SET TO 0x00AABBCC.",
-            "DISABLING INTRUSION DETECTION SYSTEM (IDS): Configuration file modified.",
-            "ESTABLISHING REVERSE SHELL: Connected to C2 server via port 8080.",
-            "FILE TRANSFER ACTIVE: Downloading trojan dropper as 'svch0st.exe'.",
-            "DELETING LOGS: Clearing system and security event records.",
-            "ELEVATING PRIVILEGES: Injecting into LSASS process.",
-            "PASSWORD HASHES DUMPED: Decrypting cached credentials...",
-            "CREATING PERSISTENCE: Setting Scheduled Task 'UpdaterService'.",
-            "HOOKING API CALLS: Monitoring keyboard and mouse input.",
-            "STARTING KEYLOGGER MODULE: Input monitoring began at 10:52:42 AM.",
-            "PATCHING BINARIES: Inserting malicious DLL into critical path.",
-            "MODIFYING HOSTS FILE: Redirecting security domain traffic.",
-            "ENCRYPTING USER DATA: All files with extensions .doc, .jpg, .zip locked.",
-            "RANSOM NOTE GENERATED: Filename 'READ_ME_DECRYPT.txt' placed on Desktop.",
-            "SCANNING NETWORK SHARES: Looking for accessible remote drives.",
-            "PROPAGATION MODULE ACTIVE: Spreading to 192.168.1.0/24 subnet.",
-            "ACTIVATING DENIAL OF SERVICE (DoS) THREAD: Stressing CPU resources.",
-            "MALWARE OPERATION STATUS: FULLY COMMITTED AND UNDETECTED.",
-            "SHUTTING DOWN SYSTEM SERVICE: Preventing remote access and recovery.",
-        ];        
+        const FULL_INIT_LOG = [
+            { type: 'title', response: "// SYSTEM: Welcome Back Aji" },
+            { type: 'secondary', response: "--------------------------------------------------------" },
+            
+            // Stage 1 Log
+            { type: 'title', response: "PHASE 1: FIRMWARE INITIALIZATION" },
+            { type: 'secondary', response: "  -> Initializing Core Firmware v3.0.1... [OK]" },
+            { type: 'secondary', response: "  -> Scanning hardware: CPU Temperature (34°C). Drive Status (Online)." },
+            { type: 'success', response: "  -> Starting critical services: [Network], [Encryption]." },
+            // Stage 2 Log
+            { type: 'title', response: "PHASE 2: NETWORK & PROTOCOL CHECK" },
+            { type: 'secondary', response: "  -> Loading Kernel Modules: fs_sync.dll, net_sec.sys, task_mgr.exe..." },
+            { type: 'success', response: "  -> Ping latency check to server 10.0.0.1: 5ms." },
+            { type: 'success', response: "  -> Establishing secure channel... Done." },
+            // Stage 3 Log
+            { type: 'title', response: "PHASE 3: ACCESS VERIFICATION" },
+            { type: 'secondary', response: "  -> Verifying credentials against local cache..." },
+            { type: 'error', response: "  -> Cache Checksum Mismatch! Local data compromised." },
+            { type: 'error', response: "  -> WARNING: Forcing manual authentication via console." },
+            { type: 'success', response: "  -> System is ready for Stage 2 command input." },
+        ];
+        
+        const FAILURE_LOG = [
+            { type: 'title', response: "SECURITY ALERT: AUTHENTICATION FAILURE" },
+            { type: 'error', response: "  -> Key rejected. Protocol breach attempt detected." },
+            { type: 'secondary', response: "  -> Running emergency diagnostics..." },
+            { type: 'secondary', response: "  -> System integrity check: PASS." },
+            { type: 'error', response: "  -> Intrusion attempt logged. Reinitializing key input buffer." },
+            { type: 'secondary', response: "  -> Awaiting new key. Input required." },
+        ];
+
+        const LOG_BREAKPOINTS = [6, 10, 15]; 
+
+        const DISPLAY_CODES = [
+            "LOAD_MODULE", "CHECK_INIT", "VERIFY_CERT", "SET_FLAG", 
+            "CALC_SUM", "EXEC_PROC", "DECRYPT_KEY", "NETWORK_PING",
+            "SYNC_TIME", "READ_BUFFER", "FINAL_AUTH", "GET_HASH",
+        ];
         
         async function sha256Hex(str) {
             const enc = new TextEncoder().encode(str);
@@ -293,88 +216,88 @@
             return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        function appendOutput(text, className = '') {
-            const line = document.createElement('div');
-            line.textContent = text;
-            if (className) {
-                line.className = className;
-            }
-            output.appendChild(line);
-            while (output.childElementCount > 15) {
-                output.removeChild(output.firstChild);
-            }
+        function appendLogLine(responseText, className = '') {
+            const responseLine = document.createElement('div');
+            responseLine.textContent = responseText;
+            responseLine.className = className;
+            output.appendChild(responseLine);
             output.scrollTop = output.scrollHeight; 
         }
 
-        function startLoopTyping() {
-            let currentLine = '';
-            let lineIndex = 0;
-            let textIndex = 0;
+        // FUNGSI BARU: Untuk menambahkan baris dengan efek mengetik
+        function appendTypingLine(responseText, className = '') {
+            const responseLine = document.createElement('div');
+            // Bungkus teks di dalam span dengan class 'typing'
+            responseLine.innerHTML = `<span class="typing">${responseText}</span>`;
+            responseLine.className = className;
+            output.appendChild(responseLine);
+            output.scrollTop = output.scrollHeight; 
             
-            function typeChar() {
-                if (!currentLine) {
-                    textIndex = Math.floor(Math.random() * LOOP_TEXTS.length);
-                    currentLine = LOOP_TEXTS[textIndex];
-                    lineIndex = 0;
-                    appendOutput(`> ${currentLine.slice(0, lineIndex)}`, 'message-secondary');
+            // Hapus kelas 'typing' setelah animasi selesai
+            setTimeout(() => {
+                const typingSpan = responseLine.querySelector('.typing');
+                if (typingSpan) {
+                    typingSpan.style.width = 'auto'; // Tampilkan penuh
+                    typingSpan.style.borderRight = 'none'; // Hapus kursor
                 }
-
-                if (lineIndex < currentLine.length) {
-                    const lastLine = output.lastElementChild;
-                    lastLine.textContent = `> ${currentLine.slice(0, lineIndex + 1)} |`; 
-                    lineIndex++;
-                    
-                    setTimeout(typeChar, 0); 
-                } else {
-                    const lastLine = output.lastElementChild;
-                    lastLine.textContent = `> ${currentLine.slice(0, lineIndex)}`; 
-                    currentLine = ''; 
-                    
-                    setTimeout(typeChar, Math.random() * 4 + 1); 
-                }
-            }
-            typeChar();
+            }, 1500); // 1.5s adalah durasi animasi di CSS
         }
 
-        function startElementGlitchEffect() {
-            const container = document.getElementById('terminalContainer');
-            const elementsToGlitch = [glitchTitle, container];
-
-            function triggerGlitch() {
-                elementsToGlitch.forEach(el => {
-                    el.classList.add('glitch-effect');
-                });
-
-                setTimeout(() => {
-                    elementsToGlitch.forEach(el => {
-                        el.classList.remove('glitch-effect');
-                    });
-                    
-                    const nextGlitchTime = Math.random() * 2500 + 500; 
-                    setTimeout(triggerGlitch, nextGlitchTime);
-                }, 200); 
+        function appendPromptToHistory(promptText) {
+            const promptLine = document.createElement('div');
+            promptLine.textContent = `${promptSymbol.textContent} ${promptText}`;
+            promptLine.className = 'message-secondary';
+            output.appendChild(promptLine);
+            output.scrollTop = output.scrollHeight; 
+        }
+        
+        function updateMaskedInput(realValue) {
+            const length = realValue.length;
+            let displayedCode = "";
+            
+            for (let i = 0; i < length; i++) {
+                displayedCode += DISPLAY_CODES[i % DISPLAY_CODES.length] + ' ';
             }
             
-            setTimeout(triggerGlitch, 1000); 
+            maskedInput.textContent = displayedCode.trim();
         }
 
-        function startScreenGlitch() {
-            function triggerScreenGlitch() {
-                glitchOverlay.classList.add('screen-glitch-active');
-                bodyElement.classList.add('shaking'); 
-                
-                const activeDuration = Math.random() * 200 + 100; 
-                
-                setTimeout(() => {
-                    glitchOverlay.classList.remove('screen-glitch-active');
-                    bodyElement.classList.remove('shaking'); 
-
-                    const nextGlitchTime = Math.random() * 1500 + 500; 
-                    setTimeout(triggerScreenGlitch, nextGlitchTime);
-                }, activeDuration); 
-            }
+        async function runStageLog(logArray, onCompleteCallback) {
+            isAuthenticating = true; 
+            let delay = 50; 
             
-            setTimeout(triggerScreenGlitch, 500); 
+            for (let i = 0; i < logArray.length; i++) {
+                setTimeout(() => {
+                    const log = logArray[i];
+                    appendLogLine(log.response, `message-${log.type}`);
+                    
+                    if (i === logArray.length - 1) {
+                        onCompleteCallback();
+                    }
+                }, delay * i); 
+            }
+        }
+
+        function welcomeSequence() {
+            // Setelah kontainer muncul (1.5 detik), mulai mengetik pesan
+            setTimeout(() => {
+                // Pesan Selamat Datang Aji (Typing Effect)
+                appendTypingLine(FULL_INIT_LOG[0].response, `message-${FULL_INIT_LOG[0].type}`);
+                
+                // Pesan Garis Pemisah (Normal)
+                setTimeout(() => {
+                    appendLogLine(FULL_INIT_LOG[1].response, `message-${FULL_INIT_LOG[1].type}`);
+                    
+                    // Pesan System Ready (Typing Effect)
+                    setTimeout(() => {
+                        appendTypingLine("System Ready. Press ENTER to begin sequence.", 'message-success');
+                        isAuthenticating = false;
+                        input.focus(); 
+                    }, 500); // Tunggu 0.5 detik setelah garis
+
+                }, 1600); // Tunggu 1.6 detik (setelah typing welcome selesai)
+
+            }, 1000); // Mulai 1 detik setelah halaman load (saat fade-in berjalan)
         }
 
         async function preloadPasswordHash() {
@@ -383,51 +306,89 @@
                 storedHash = snapshot.val();
 
                 if (!storedHash) {
-                    appendOutput("ERROR: Failed to retrieve hash. DB offline.", 'message-error');
+                    appendLogLine("FATAL ERROR: Failed to retrieve hash.", 'message-error');
                 } else {
-                    appendOutput("SUCCESS: Hash loaded. System operational.", 'message-success');
-                    input.focus(); 
+                    welcomeSequence();
                 }
 
             } catch (error) {
                 console.error('Error saat memuat sandi:', error);
-                appendOutput("FATAL ERROR: Network connection failed.", 'message-error');
+                appendLogLine("FATAL ERROR: Network connection failed.", 'message-error');
             }
         }
 
+        // --- Event Listeners ---
+
+        input.addEventListener('input', () => {
+            updateMaskedInput(input.value);
+        });
+        
         input.addEventListener('keydown', async (event) => {
             if (event.key !== 'Enter' || isAuthenticating) return;
             
             event.preventDefault();
             
-            const password = input.value.trim();
-            if (password.length === 0) return;
+            const enteredText = input.value.trim();
+            const displayedText = maskedInput.textContent;
+            
+            appendPromptToHistory(displayedText || 'EXECUTE');
 
-            isAuthenticating = true;
-            
-            appendOutput(`// Verifying input (${password.length} chars) via secure channel...`, 'message-secondary');
-            
-            const inputHash = await sha256Hex(password);
-            
-            if (inputHash === storedHash) {
-                appendOutput('ACCESS GRANTED. Redirecting...', 'message-success');
-                setTimeout(() => {
-                    window.location.href = REDIRECT_URL;
-                }, 500); 
+            input.value = '';
+            updateMaskedInput('');
+
+            if (currentStage <= MAX_FAKE_STAGES) {
+                // --- TAHAP PALSU (1, 2, 3) ---
+                
+                const currentLogIndex = currentStage === 1 ? 2 : LOG_BREAKPOINTS[currentStage - 2];
+                const nextLogIndex = LOG_BREAKPOINTS[currentStage - 1];
+                
+                const stageLog = FULL_INIT_LOG.slice(currentLogIndex, nextLogIndex);
+
+                runStageLog(stageLog, () => {
+                    currentStage++; 
+                    if (currentStage <= MAX_FAKE_STAGES) {
+                        promptSymbol.textContent = `STAGE-${currentStage} $`;
+                    } else {
+                        promptSymbol.textContent = 'AUTH $'; 
+                        appendLogLine("Access Control Activated. Enter Final Key.", 'message-title');
+                    }
+                    isAuthenticating = false; 
+                    input.focus();
+                });
 
             } else {
-                appendOutput('ACCESS DENIED. Invalid credentials.', 'message-error');
-                input.value = '';
-                input.focus();
-                isAuthenticating = false;
+                // --- TAHAP NYATA (4) ---
+                
+                if (enteredText.length === 0) {
+                    appendLogLine("ERROR: Access key required.", 'message-error');
+                    return;
+                }
+
+                isAuthenticating = true;
+                appendLogLine("Executing Final Authentication...", 'message-secondary');
+                
+                const inputHash = await sha256Hex(enteredText);
+                
+                if (inputHash === storedHash) {
+                    // BERHASIL MASUK
+                    appendLogLine('ACCESS GRANTED. Redirecting to secured environment...', 'message-success');
+                    setTimeout(() => {
+                        window.location.href = REDIRECT_URL;
+                    }, 1000); 
+
+                } else {
+                    // GAGAL, RUN LOG KEGAGALAN PANJANG
+                    runStageLog(FAILURE_LOG, () => {
+                        promptSymbol.textContent = 'AUTH $'; 
+                        isAuthenticating = false; 
+                        input.focus();
+                    });
+                }
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             preloadPasswordHash(); 
-            startLoopTyping(); 
-            startElementGlitchEffect(); 
-            startScreenGlitch(); 
             
             document.addEventListener('click', () => {
                 input.focus();
