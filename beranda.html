@@ -52,7 +52,8 @@
         const hamburgerButton = document.getElementById('hamburger-btn'); 
         
         const ACTIVE_KEY = 'activePageUrl'; 
-        const DEFAULT_URL = 'https://artsite07.github.io/Ak29238928h92398/home.html'; 
+        // URL HOME DISAMAKAN DENGAN IFRAME HOME STATIS
+        const DEFAULT_URL = 'https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home'; 
         const SIDEBAR_OPEN_CLASS = 'sidebar-open';
         const SIDEBAR_LOCKED_CLASS = 'sidebar-locked'; 
         
@@ -87,7 +88,7 @@
             }
         }
 
-        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: Dynamic Frame Selalu Dimuat Ulang) ---
+        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: history.replaceState DIHAPUS) ---
         const setActiveState = (newUrl, element) => {
             document.querySelectorAll('#sidebar a').forEach(l => {
                 l.classList.remove('active');
@@ -138,7 +139,9 @@
                 isInitialLoadDone = true; 
             }
             
-            history.replaceState(null, '', newUrl);
+            // !!! BARIS INI DIHAPUS UNTUK MENGHINDARI SECURIYERROR !!!
+            // history.replaceState(null, '', newUrl);
+            
             sessionStorage.setItem(ACTIVE_KEY, newUrl);
         };
 
@@ -239,6 +242,7 @@
                  initialLink = document.querySelector(`[href="${DEFAULT_URL}"]`);
                  initialUrl = DEFAULT_URL;
             } else {
+                 // Ambil URL yang sesuai, baik dari href atau data-url
                  initialUrl = initialLink.getAttribute('href') || initialLink.dataset.url;
             }
             
@@ -814,7 +818,7 @@
         
         <nav role="navigation">
             <div id="main-nav">
-                <a href="https://artsite07.github.io/Ak29238928h92398/home.html" data-target="aplikasi-frame" title="Halaman Utama">
+                <a href="https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home" data-target="home-frame" title="Halaman Utama">
                     <i class="fa-solid fa-house"></i>
                     <span>Home</span>
                 </a>
@@ -822,7 +826,7 @@
                     <i class="fa-solid fa-hard-drive"></i>
                     <span>V-Drive</span>
                 </a>
-                <a href="https://zeroexec.github.io/mytools/codingin" data-target="codingin-frame" title="Terminal Simulasi">
+                <a href="https://zeroexec.github.io/mytools/codingin" data-target="terminal-frame" title="Terminal Simulasi">
                     <i class="fa-solid fa-terminal"></i>
                     <span>Terminal</span>
                 </a>
@@ -845,9 +849,11 @@
             <iframe id="home-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home" title="Halaman Utama">
                 Browser Anda tidak mendukung iframe.
             </iframe>
+            
             <iframe id="vdrive-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/v-drive" title="Penyimpanan Virtual">
                 Browser Anda tidak mendukung iframe.
             </iframe>
+            
             <iframe id="terminal-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/codingin" title="Terminal Simulasi">
                 Browser Anda tidak mendukung iframe.
             </iframe>
