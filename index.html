@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Akses Bertahap</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <title>Sistem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     
     <style>
         :root {
-            --bg-dark: black; 
-            --text-main: #00FF00; 
-            --text-secondary: #008000; 
-            --text-error: #FF0000; 
-            --text-success: #00FFFF; 
-            --font-main: 'Roboto Mono', monospace; 
+            --bg-dark: #1C1C28; 
+            --terminal-border: #3A3A4A; 
+            --text-main: #C9D1D9; 
+            --text-prompt: #8B949E; 
+            --neon-success: #4CAF50; 
+            --neon-error: #FF6B6B; 
+            --neon-title: #7986CB; 
+            --neon-highlight: #74D4FF; 
+            --font-main: 'Fira Code', monospace; 
         }
         
         body {
@@ -30,58 +33,76 @@
             background-color: var(--bg-dark); 
             color: var(--text-main); 
             overflow: hidden; 
+            font-size: 16px; 
         }
         
         .terminal-container {
             width: 90%;
-            max-width: 600px; 
-            padding: 20px 10px; 
+            max-width: 750px; 
+            padding: 30px; 
+            background-color: #242436; 
+            border: 1px solid var(--terminal-border);
+            border-radius: 8px; 
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 5px rgba(121, 134, 203, 0.2); 
             text-align: left;
-            /* --- ANIMASI MASUK BARU --- */
             opacity: 0; 
-            animation: fadeIn 1.5s ease-out forwards;
+            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+            transition: box-shadow 0.3s ease;
+        }
+
+        .terminal-container:hover {
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7), 0 0 10px rgba(121, 134, 203, 0.4);
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: scale(0.95); } 
+            to { opacity: 1; transform: scale(1); } 
         }
-        /* ------------------------- */
 
         .output-history {
             min-height: 50px;
-            max-height: 80vh;
-            overflow-y: scroll; 
-            font-size: 1.1rem;
-            line-height: 1.4;
-            padding-bottom: 5px;
-            
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            max-height: 70vh;
+            overflow-y: auto; 
+            font-size: 1rem;
+            line-height: 1.6;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            white-space: pre-wrap; 
         }
+        
         .output-history::-webkit-scrollbar {
-            display: none;
+            width: 8px;
+        }
+        .output-history::-webkit-scrollbar-thumb {
+            background-color: var(--terminal-border);
+            border-radius: 10px;
+        }
+        .output-history::-webkit-scrollbar-track {
+            background-color: var(--bg-dark);
         }
 
         .prompt-line {
             display: flex;
             gap: 10px;
             font-size: 1.1rem;
-            color: var(--text-main);
+            color: var(--text-prompt);
+            margin-top: 5px;
         }
 
         .prompt-symbol {
             font-weight: bold;
+            color: var(--neon-highlight); 
         }
 
         .cursor {
             display: inline-block;
             width: 8px; 
             height: 1.2em;
-            background-color: var(--text-main); 
-            animation: blink 1s step-start infinite;
+            background-color: var(--neon-highlight); 
+            animation: blink 0.8s step-start infinite; 
             margin-left: 2px;
             vertical-align: middle;
+            border-radius: 1px;
         }
 
         @keyframes blink {
@@ -98,17 +119,22 @@
             z-index: -1; 
         }
         
-        .message-success { color: var(--text-success); }
-        .message-error { color: var(--text-error); }
-        .message-secondary { color: var(--text-secondary); }
-        .message-title { color: white; font-weight: bold; }
-
-        /* --- Gaya Efek Mengetik BARU --- */
+        .message-success { color: var(--neon-success); }
+        .message-error { color: var(--neon-error); }
+        .message-secondary { color: var(--text-prompt); }
+        .message-title { 
+            color: var(--neon-title); 
+            font-weight: bold; 
+            text-shadow: 0 0 5px rgba(121, 134, 203, 0.5); 
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        
         .typing {
-            overflow: hidden; /* Pastikan teks tidak terlihat sebelum diketik */
-            white-space: nowrap; /* Teks tetap dalam satu baris */
-            width: 0; /* Lebar awal 0 */
-            border-right: 0.15em solid white; /* Efek kursor mengetik */
+            overflow: hidden; 
+            white-space: nowrap; 
+            width: 0; 
+            border-right: none; 
             animation: typing 1.5s steps(30, end) forwards;
         }
         
@@ -116,7 +142,6 @@
             from { width: 0 }
             to { width: 100% }
         }
-        /* -------------------------------- */
     </style>
 </head>
 <body>
@@ -127,7 +152,7 @@
             </div>
 
         <div class="prompt-line">
-            <span class="prompt-symbol" id="promptSymbol">STAGE-1 $</span>
+            <span class="prompt-symbol" id="promptSymbol">ACCESS_01 $</span>
             <div id="inputDisplay">
                 <span id="maskedInput"></span><span id="cursor" class="cursor"></span>
             </div>
@@ -158,7 +183,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
+        
         const input = document.getElementById('passwordInput');
         const output = document.getElementById('output');
         const maskedInput = document.getElementById('maskedInput');
@@ -172,34 +197,33 @@
         const MAX_FAKE_STAGES = 3; 
         
         const FULL_INIT_LOG = [
-            { type: 'title', response: "// SYSTEM: Welcome Back Aji" },
+            { type: 'title', response: ">>> ACCESS CONTROL PROTOCOL V4.1 INITIATED" },
             { type: 'secondary', response: "--------------------------------------------------------" },
             
-            // Stage 1 Log
-            { type: 'title', response: "PHASE 1: FIRMWARE INITIALIZATION" },
-            { type: 'secondary', response: "  -> Initializing Core Firmware v3.0.1... [OK]" },
-            { type: 'secondary', response: "  -> Scanning hardware: CPU Temperature (34°C). Drive Status (Online)." },
-            { type: 'success', response: "  -> Starting critical services: [Network], [Encryption]." },
-            // Stage 2 Log
-            { type: 'title', response: "PHASE 2: NETWORK & PROTOCOL CHECK" },
-            { type: 'secondary', response: "  -> Loading Kernel Modules: fs_sync.dll, net_sec.sys, task_mgr.exe..." },
-            { type: 'success', response: "  -> Ping latency check to server 10.0.0.1: 5ms." },
-            { type: 'success', response: "  -> Establishing secure channel... Done." },
-            // Stage 3 Log
-            { type: 'title', response: "PHASE 3: ACCESS VERIFICATION" },
-            { type: 'secondary', response: "  -> Verifying credentials against local cache..." },
-            { type: 'error', response: "  -> Cache Checksum Mismatch! Local data compromised." },
-            { type: 'error', response: "  -> WARNING: Forcing manual authentication via console." },
-            { type: 'success', response: "  -> System is ready for Stage 2 command input." },
+            
+            { type: 'title', response: "PHASE 1: SYSTEM CORE INITIALIZATION" },
+            { type: 'secondary', response: " -> Initializing Secure Firmware (v4.1.2)... [OK]" },
+            { type: 'secondary', response: " -> Scanning Hardware: Temp(34°C). Drive(Online). SecureMode(Active)." },
+            { type: 'success', response: " -> Loading Critical Modules: [Network_S], [Enc_256], [Task_Mgr]." },
+            
+            { type: 'title', response: "PHASE 2: NETWORK & DATA PROTOCOL CHECK" },
+            { type: 'secondary', response: " -> Checking network latency to Primary Server (5ms)." },
+            { type: 'success', response: " -> Secure channel established (TLS 1.3/AES-256)." },
+            { type: 'secondary', response: " -> Preparing key buffer for next stage." },
+            
+            { type: 'title', response: "PHASE 3: LOCAL CACHE VERIFICATION" },
+            { type: 'secondary', response: " -> Verifying credentials against local encrypted cache..." },
+            { type: 'error', response: " -> Cache integrity check FAILED (0xCD12). Forcing manual input." },
+            { type: 'error', response: " -> WARNING: Manual input required. Proceed to next stage." },
+            { type: 'success', response: " -> System ready. Proceed to **STAGE-4**." },
         ];
         
         const FAILURE_LOG = [
-            { type: 'title', response: "SECURITY ALERT: AUTHENTICATION FAILURE" },
-            { type: 'error', response: "  -> Key rejected. Protocol breach attempt detected." },
-            { type: 'secondary', response: "  -> Running emergency diagnostics..." },
-            { type: 'secondary', response: "  -> System integrity check: PASS." },
-            { type: 'error', response: "  -> Intrusion attempt logged. Reinitializing key input buffer." },
-            { type: 'secondary', response: "  -> Awaiting new key. Input required." },
+            { type: 'title', response: "!!! AUTHENTICATION FAILURE ALERT !!!" },
+            { type: 'error', response: " -> Key rejected. Invalid sequence or hash mismatch." },
+            { type: 'secondary', response: " -> Running emergency diagnostics and key reinitialization..." },
+            { type: 'secondary', response: " -> Integrity check: PASS. Attempt logged." },
+            { type: 'error', response: " -> Input buffer cleared. Awaiting new Final Key." },
         ];
 
         const LOG_BREAKPOINTS = [6, 10, 15]; 
@@ -209,7 +233,7 @@
             "CALC_SUM", "EXEC_PROC", "DECRYPT_KEY", "NETWORK_PING",
             "SYNC_TIME", "READ_BUFFER", "FINAL_AUTH", "GET_HASH",
         ];
-        
+
         async function sha256Hex(str) {
             const enc = new TextEncoder().encode(str);
             const digest = await crypto.subtle.digest('SHA-256', enc);
@@ -224,23 +248,19 @@
             output.scrollTop = output.scrollHeight; 
         }
 
-        // FUNGSI BARU: Untuk menambahkan baris dengan efek mengetik
         function appendTypingLine(responseText, className = '') {
             const responseLine = document.createElement('div');
-            // Bungkus teks di dalam span dengan class 'typing'
             responseLine.innerHTML = `<span class="typing">${responseText}</span>`;
             responseLine.className = className;
             output.appendChild(responseLine);
             output.scrollTop = output.scrollHeight; 
             
-            // Hapus kelas 'typing' setelah animasi selesai
             setTimeout(() => {
                 const typingSpan = responseLine.querySelector('.typing');
                 if (typingSpan) {
-                    typingSpan.style.width = 'auto'; // Tampilkan penuh
-                    typingSpan.style.borderRight = 'none'; // Hapus kursor
+                    typingSpan.style.width = 'auto'; 
                 }
-            }, 1500); // 1.5s adalah durasi animasi di CSS
+            }, 1500); 
         }
 
         function appendPromptToHistory(promptText) {
@@ -264,7 +284,7 @@
 
         async function runStageLog(logArray, onCompleteCallback) {
             isAuthenticating = true; 
-            let delay = 50; 
+            let delay = 70; 
             
             for (let i = 0; i < logArray.length; i++) {
                 setTimeout(() => {
@@ -279,25 +299,20 @@
         }
 
         function welcomeSequence() {
-            // Setelah kontainer muncul (1.5 detik), mulai mengetik pesan
             setTimeout(() => {
-                // Pesan Selamat Datang Aji (Typing Effect)
-                appendTypingLine(FULL_INIT_LOG[0].response, `message-${FULL_INIT_LOG[0].type}`);
+                appendTypingLine(FULL_INIT_LOG[0].response, `message-${FULL_INIT_LOG[0].type}`); 
                 
-                // Pesan Garis Pemisah (Normal)
                 setTimeout(() => {
                     appendLogLine(FULL_INIT_LOG[1].response, `message-${FULL_INIT_LOG[1].type}`);
                     
-                    // Pesan System Ready (Typing Effect)
                     setTimeout(() => {
-                        appendTypingLine("System Ready. Press ENTER to begin sequence.", 'message-success');
+                        appendTypingLine("System Ready. Press ENTER to begin **STAGE 1**.", 'message-success');
                         isAuthenticating = false;
                         input.focus(); 
-                    }, 500); // Tunggu 0.5 detik setelah garis
+                    }, 500); 
+                }, 1600); 
 
-                }, 1600); // Tunggu 1.6 detik (setelah typing welcome selesai)
-
-            }, 1000); // Mulai 1 detik setelah halaman load (saat fade-in berjalan)
+            }, 1000); 
         }
 
         async function preloadPasswordHash() {
@@ -317,10 +332,8 @@
             }
         }
 
-        // --- Event Listeners ---
-
         input.addEventListener('input', () => {
-            updateMaskedInput(input.value);
+            updateMaskedInput(input.value); 
         });
         
         input.addEventListener('keydown', async (event) => {
@@ -331,13 +344,12 @@
             const enteredText = input.value.trim();
             const displayedText = maskedInput.textContent;
             
-            appendPromptToHistory(displayedText || 'EXECUTE');
+            appendPromptToHistory(displayedText || (currentStage <= MAX_FAKE_STAGES ? 'INIT_EXECUTE' : 'ENTER_KEY'));
 
             input.value = '';
             updateMaskedInput('');
 
             if (currentStage <= MAX_FAKE_STAGES) {
-                // --- TAHAP PALSU (1, 2, 3) ---
                 
                 const currentLogIndex = currentStage === 1 ? 2 : LOG_BREAKPOINTS[currentStage - 2];
                 const nextLogIndex = LOG_BREAKPOINTS[currentStage - 1];
@@ -347,39 +359,41 @@
                 runStageLog(stageLog, () => {
                     currentStage++; 
                     if (currentStage <= MAX_FAKE_STAGES) {
-                        promptSymbol.textContent = `STAGE-${currentStage} $`;
+                        promptSymbol.textContent = `ACCESS_0${currentStage} $`;
+                        appendLogLine(`System Ready. Press ENTER to begin **STAGE ${currentStage}** command input.`, 'message-success');
                     } else {
-                        promptSymbol.textContent = 'AUTH $'; 
-                        appendLogLine("Access Control Activated. Enter Final Key.", 'message-title');
+                        promptSymbol.textContent = 'AUTH_FINAL $'; 
+                        appendLogLine("Access Control Activated. Enter **FINAL KEY**.", 'message-title');
                     }
                     isAuthenticating = false; 
                     input.focus();
                 });
 
             } else {
-                // --- TAHAP NYATA (4) ---
                 
                 if (enteredText.length === 0) {
-                    appendLogLine("ERROR: Access key required.", 'message-error');
+                    appendLogLine("ERROR: Final Access Key is required.", 'message-error');
+                    isAuthenticating = false;
+                    input.focus();
                     return;
                 }
 
                 isAuthenticating = true;
-                appendLogLine("Executing Final Authentication...", 'message-secondary');
+                appendLogLine("Executing Final Authentication (SHA-256)...", 'message-secondary');
                 
                 const inputHash = await sha256Hex(enteredText);
                 
                 if (inputHash === storedHash) {
-                    // BERHASIL MASUK
+                    
                     appendLogLine('ACCESS GRANTED. Redirecting to secured environment...', 'message-success');
                     setTimeout(() => {
                         window.location.href = REDIRECT_URL;
                     }, 1000); 
 
                 } else {
-                    // GAGAL, RUN LOG KEGAGALAN PANJANG
+                    
                     runStageLog(FAILURE_LOG, () => {
-                        promptSymbol.textContent = 'AUTH $'; 
+                        promptSymbol.textContent = 'AUTH_FINAL $'; 
                         isAuthenticating = false; 
                         input.focus();
                     });
