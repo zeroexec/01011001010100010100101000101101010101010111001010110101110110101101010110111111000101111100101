@@ -3,18 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Animasi Garis Luar (Tanpa Mengambang)</title>
+    <title>Logo Animasi Garis Luar (Detak Intensif)</title>
     <style>
         /* * --- Variabel ---
          */
         :root {
             --dark-bg: #030408; 
-            --outline-color: #f3f4f6; /* Warna Garis Luar */
-            --outline-width: 3px;     /* Tebal Garis Luar */
+            --outline-color: #f3f4f6;
+            --outline-width: 3px;     
             --circle-size: 250px; 
-            --float-duration: 3.5s; 
+            --float-duration: 3.5s;   
+            --float-distance: 10px;   
             --entrance-duration: 1.5s; 
             --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); 
+            
+            --profile-entrance-total-time: 1.7s; 
+            --glow-duration: 0.8s;
+            --glow-color: #00eaff; 
+            --float-start-time: 2.5s; 
         }
 
         * {
@@ -23,8 +29,6 @@
             box-sizing: border-box;
         }
 
-        /* * --- Gaya Halaman ---
-         */
         body {
             background-color: var(--dark-bg);
             display: flex;
@@ -35,8 +39,21 @@
             position: relative;
         }
 
-        /* * --- Container Utama ---
-         */
+        .background-light {
+            position: absolute;
+            width: 50vw; 
+            height: 50vw;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+            opacity: 0.15; 
+            pointer-events: none;
+            z-index: 5; 
+            
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+            animation: lightMove 25s ease-in-out infinite alternate; 
+        }
+
         .welcome-area {
             text-align: center;
             z-index: 10;
@@ -45,7 +62,7 @@
             animation: areaEntrance var(--entrance-duration) var(--entrance-curve) forwards; 
         }
 
-        /* * --- Wrapper Lingkaran (HANYA GARIS LUAR) ---
+        /* * --- Wrapper Lingkaran (GARIS LUAR) ---
          */
         .profile-pic-wrapper {
             width: var(--circle-size); 
@@ -55,34 +72,59 @@
             justify-content: center;
             align-items: center;
             
-            /* --- PERUBAHAN UTAMA: Menghilangkan Background & Menambahkan Border --- */
             background-color: transparent; 
             border: var(--outline-width) solid var(--outline-color); 
-            
             overflow: hidden; 
 
             opacity: 0;
             transform: scale(0.5);
             
-            /* MODIFIKASI: Animasi 'profileFloat' telah dihapus */
+            /* MODIFIKASI: Durasi pulseGlow diperpanjang menjadi 6s */
             animation: 
-                profileEntrance 1.2s var(--entrance-curve) forwards 0.5s; 
+                profileEntrance 1.2s var(--entrance-curve) forwards 0.5s, 
+                outlineGlow var(--glow-duration) ease-out forwards var(--profile-entrance-total-time),
+                floatAnimation var(--float-duration) ease-in-out infinite var(--float-start-time),
+                pulseGlow 6s ease-in-out infinite var(--float-start-time);
             
             filter: none; 
         }
 
-        /* * --- Gambar di Dalam Wrapper ---
-         */
         .profile-pic {
-            /* Gambar mengisi 100% dari area lingkaran */
             width: 100%; 
             height: 100%;
             border-radius: 50%; 
             object-fit: cover;
             display: block;
+            
+            opacity: 0; 
+            animation: contentSolid 1s ease-out forwards var(--float-start-time);
         }
 
-        /* * --- Keyframes Animasi (profileFloat tidak digunakan) ---
+        .welcome-toast {
+            position: fixed;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            
+            color: var(--outline-color);
+            background-color: transparent; 
+            padding: 0; 
+            border: none; 
+            
+            font-family: sans-serif;
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-shadow: none; 
+
+            opacity: 0; 
+            animation: 
+                toastEnter 0.7s ease-out forwards 3s, 
+                toastExit 0.7s ease-in forwards 6s;
+        }
+
+        /* * --- Keyframes Animasi ---
          */
         
         @keyframes areaEntrance {
@@ -92,26 +134,95 @@
         @keyframes profileEntrance {
             to { opacity: 1; transform: scale(1); }
         }
-
-        @keyframes profileFloat {
+        
+        @keyframes outlineGlow {
             0% { 
-                transform: translateY(0px) scale(1); 
+                box-shadow: 0 0 0 transparent;
             }
             50% { 
-                transform: translateY(-10px) scale(1.01); 
+                box-shadow: 
+                    0 0 10px var(--glow-color), 
+                    0 0 20px var(--glow-color), 
+                    0 0 30px var(--glow-color);
             }
             100% { 
-                transform: translateY(0px) scale(1); 
+                box-shadow: 0 0 0 transparent;
+            }
+        }
+        
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(calc(-1 * var(--float-distance))); 
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes lightMove {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                transform: translate(-55%, -45%) scale(1.1);
+            }
+        }
+        
+        @keyframes contentSolid {
+            to { 
+                opacity: 1; 
+            }
+        }
+        
+        @keyframes toastEnter {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+        }
+
+        @keyframes toastExit {
+            to {
+                opacity: 0;
+                transform: translate(-50%, -15px) scale(1);
+            }
+        }
+
+        /* * --- KEYFRAMES GLOW BERDETAK (MODIFIKASI: Terang dan Jarang) ---
+         */
+        @keyframes pulseGlow {
+            0%, 10%, 100% { 
+                /* Cahaya hampir mati */
+                box-shadow: 0 0 0 transparent;
+            }
+            5% { 
+                /* Puncak Detak Cahaya yang sangat singkat dan intensif */
+                box-shadow: 
+                    0 0 15px var(--glow-color), 
+                    0 0 30px var(--glow-color),
+                    0 0 50px var(--glow-color); 
             }
         }
 
     </style>
 </head>
 <body>
+    <div class="background-light"></div> 
+    
     <div class="welcome-area">
         <div class="profile-pic-wrapper">
             <img src="logo.png" alt="Logo Digital" class="profile-pic">
         </div>
     </div>
+
+    <div class="welcome-toast">WELCOME BACK AJI</div>
+    
 </body>
 </html>
