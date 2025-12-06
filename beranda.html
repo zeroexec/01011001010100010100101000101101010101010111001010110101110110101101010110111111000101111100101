@@ -52,8 +52,7 @@
         const hamburgerButton = document.getElementById('hamburger-btn'); 
         
         const ACTIVE_KEY = 'activePageUrl'; 
-        // URL HOME DISAMAKAN DENGAN IFRAME HOME STATIS
-        const DEFAULT_URL = 'https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home'; 
+        const DEFAULT_URL = 'https://artsite07.github.io/Ak29238928h92398/home.html'; 
         const SIDEBAR_OPEN_CLASS = 'sidebar-open';
         const SIDEBAR_LOCKED_CLASS = 'sidebar-locked'; 
         
@@ -88,7 +87,7 @@
             }
         }
 
-        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: history.replaceState DIHAPUS) ---
+        // --- FUNGSI NAVIGASI UTAMA (MODIFIKASI: CACHING UNTUK FRAME DINAMIS) ---
         const setActiveState = (newUrl, element) => {
             document.querySelectorAll('#sidebar a').forEach(l => {
                 l.classList.remove('active');
@@ -104,19 +103,22 @@
 
             if (targetFrame) {
                 
-                // 1. Sembunyikan dan RESET SEMUA FRAME yang TIDAK AKTIF
+                // 1. Sembunyikan SEMUA FRAME yang TIDAK AKTIF
                 appFrames.forEach(frame => {
                     // Cek apakah frame adalah frame dinamis (More Application) dan bukan yang baru diklik
                     if (frame.dataset.dynamic === "true" && frame !== targetFrame) {
-                         // **RESET**: Atur SRC frame dinamis yang tidak aktif kembali ke about:blank
-                         frame.src = 'about:blank'; 
+                         // Hapus reset ke about:blank agar frame dinamis yang sudah dimuat tetap di-cache.
+                         // frame.src = 'about:blank'; // Dihapus/Dikommentari
                     }
                     frame.classList.remove('active');
                 });
 
-                // 2. Jika frame belum dimuat (src masih about:blank) ATAU frame dinamis, muat sekarang.
-                if (targetFrame.src === 'about:blank' || targetFrame.src.startsWith('about:blank') || targetFrame.dataset.dynamic === "true") {
-                    // Muat frame, memicu reset jika frame dinamis
+                // 2. Muat frame jika SRC-nya masih about:blank (Belum pernah dimuat)
+                // Frame dinamis tidak akan dimuat ulang jika src-nya sudah diisi oleh URL.
+                const frameNeedsLoad = targetFrame.src.endsWith('about:blank') || targetFrame.src.startsWith('about:blank');
+                
+                if (frameNeedsLoad) {
+                    // Muat frame
                     targetFrame.src = targetFrame.dataset.url;
                     
                     // Listener temporer (opsional)
@@ -139,9 +141,7 @@
                 isInitialLoadDone = true; 
             }
             
-            // !!! BARIS INI DIHAPUS UNTUK MENGHINDARI SECURIYERROR !!!
-            // history.replaceState(null, '', newUrl);
-            
+            history.replaceState(null, '', newUrl);
             sessionStorage.setItem(ACTIVE_KEY, newUrl);
         };
 
@@ -167,6 +167,7 @@
             const grid = document.getElementById('app-grid-dynamic');
             grid.innerHTML = ''; 
             
+            // Hapus semua frame dinamis lama
             document.querySelectorAll('.app-frame[data-dynamic="true"]').forEach(f => f.remove());
             
             const keys = Object.keys(shortcutsData);
@@ -193,7 +194,7 @@
                 const dynamicIframe = document.createElement('iframe');
                 dynamicIframe.id = `dynamic-frame-${key}`; 
                 dynamicIframe.className = 'app-frame';
-                dynamicIframe.src = 'about:blank'; // MUAT SAAT DIKLIK
+                dynamicIframe.src = 'about:blank'; // MUAT SAAT DIKLIK PERTAMA KALI
                 dynamicIframe.dataset.url = item.url;
                 dynamicIframe.dataset.dynamic = "true"; // Penanda frame dinamis
                 dynamicIframe.title = item.name;
@@ -222,6 +223,7 @@
             
             grid.appendChild(fragment); 
             
+            // Update daftar appFrames
             appFrames = document.querySelectorAll('.app-frame'); 
 
             setupFrameListeners();
@@ -242,7 +244,6 @@
                  initialLink = document.querySelector(`[href="${DEFAULT_URL}"]`);
                  initialUrl = DEFAULT_URL;
             } else {
-                 // Ambil URL yang sesuai, baik dari href atau data-url
                  initialUrl = initialLink.getAttribute('href') || initialLink.dataset.url;
             }
             
@@ -818,7 +819,7 @@
         
         <nav role="navigation">
             <div id="main-nav">
-                <a href="https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home" data-target="home-frame" title="Halaman Utama">
+                <a href="https://artsite07.github.io/Ak29238928h92398/home.html" data-target="aplikasi-frame" title="Halaman Utama">
                     <i class="fa-solid fa-house"></i>
                     <span>Home</span>
                 </a>
@@ -826,7 +827,7 @@
                     <i class="fa-solid fa-hard-drive"></i>
                     <span>V-Drive</span>
                 </a>
-                <a href="https://zeroexec.github.io/mytools/codingin" data-target="terminal-frame" title="Terminal Simulasi">
+                <a href="https://zeroexec.github.io/mytools/codingin" data-target="codingin-frame" title="Terminal Simulasi">
                     <i class="fa-solid fa-terminal"></i>
                     <span>Terminal</span>
                 </a>
@@ -849,11 +850,9 @@
             <iframe id="home-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/01011001010100010100101000101101010101010111001010110101110110101101010110111111000101111100101/home" title="Halaman Utama">
                 Browser Anda tidak mendukung iframe.
             </iframe>
-            
             <iframe id="vdrive-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/v-drive" title="Penyimpanan Virtual">
                 Browser Anda tidak mendukung iframe.
             </iframe>
-            
             <iframe id="terminal-frame" class="app-frame" src="about:blank" data-url="https://zeroexec.github.io/mytools/codingin" title="Terminal Simulasi">
                 Browser Anda tidak mendukung iframe.
             </iframe>
