@@ -3,24 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Animasi Garis Luar (Detak Intensif)</title>
+    <title>Logo Animasi Garis Solid (Masuk Instan)</title>
     <style>
-        /* * --- Variabel ---
-         */
+        /* * --- Variabel --- */
         :root {
             --dark-bg: #030408; 
             --outline-color: #f3f4f6;
             --outline-width: 3px;     
             --circle-size: 250px; 
-            --float-duration: 3.5s;   
-            --float-distance: 10px;   
             --entrance-duration: 1.5s; 
             --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); 
-            
-            --profile-entrance-total-time: 1.7s; 
-            --glow-duration: 0.8s;
             --glow-color: #00eaff; 
-            --float-start-time: 2.5s; 
+            --entrance-delay: 0.5s; 
         }
 
         * {
@@ -62,9 +56,9 @@
             animation: areaEntrance var(--entrance-duration) var(--entrance-curve) forwards; 
         }
 
-        /* * --- Wrapper Lingkaran (GARIS LUAR) ---
-         */
-        .profile-pic-wrapper {
+        /* * --- Wrapper Lingkaran (GARIS SOLID TUNGGAL) --- */
+        /* Mengganti nama dari profile-pic-wrapper menjadi logo-wrapper untuk simplifikasi */
+        .logo-wrapper {
             width: var(--circle-size); 
             height: var(--circle-size);
             border-radius: 50%;
@@ -73,22 +67,21 @@
             align-items: center;
             
             background-color: transparent; 
+            /* Garis Solid */
             border: var(--outline-width) solid var(--outline-color); 
             overflow: hidden; 
 
             opacity: 0;
             transform: scale(0.5);
             
-            /* MODIFIKASI: Durasi pulseGlow diperpanjang menjadi 6s */
+            /* Hanya sisa animasi Entrance (profileEntrance) */
             animation: 
-                profileEntrance 1.2s var(--entrance-curve) forwards 0.5s, 
-                outlineGlow var(--glow-duration) ease-out forwards var(--profile-entrance-total-time),
-                floatAnimation var(--float-duration) ease-in-out infinite var(--float-start-time),
-                pulseGlow 6s ease-in-out infinite var(--float-start-time);
+                profileEntrance 1.2s var(--entrance-curve) forwards var(--entrance-delay);
             
             filter: none; 
         }
 
+        /* * --- Gambar Logo (Muncul Instan) --- */
         .profile-pic {
             width: 100%; 
             height: 100%;
@@ -96,36 +89,12 @@
             object-fit: cover;
             display: block;
             
-            opacity: 0; 
-            animation: contentSolid 1s ease-out forwards var(--float-start-time);
+            /* Langsung terlihat */
+            opacity: 1; 
+            animation: none;
         }
 
-        .welcome-toast {
-            position: fixed;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            
-            color: var(--outline-color);
-            background-color: transparent; 
-            padding: 0; 
-            border: none; 
-            
-            font-family: sans-serif;
-            font-size: 1.25rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-            text-shadow: none; 
-
-            opacity: 0; 
-            animation: 
-                toastEnter 0.7s ease-out forwards 3s, 
-                toastExit 0.7s ease-in forwards 6s;
-        }
-
-        /* * --- Keyframes Animasi ---
-         */
+        /* * --- Keyframes Animasi --- */
         
         @keyframes areaEntrance {
             to { opacity: 1; transform: scale(1); }
@@ -133,33 +102,6 @@
 
         @keyframes profileEntrance {
             to { opacity: 1; transform: scale(1); }
-        }
-        
-        @keyframes outlineGlow {
-            0% { 
-                box-shadow: 0 0 0 transparent;
-            }
-            50% { 
-                box-shadow: 
-                    0 0 10px var(--glow-color), 
-                    0 0 20px var(--glow-color), 
-                    0 0 30px var(--glow-color);
-            }
-            100% { 
-                box-shadow: 0 0 0 transparent;
-            }
-        }
-        
-        @keyframes floatAnimation {
-            0% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(calc(-1 * var(--float-distance))); 
-            }
-            100% {
-                transform: translateY(0);
-            }
         }
         
         @keyframes lightMove {
@@ -171,45 +113,7 @@
             }
         }
         
-        @keyframes contentSolid {
-            to { 
-                opacity: 1; 
-            }
-        }
-        
-        @keyframes toastEnter {
-            from {
-                opacity: 0;
-                transform: translate(-50%, 20px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0) scale(1);
-            }
-        }
-
-        @keyframes toastExit {
-            to {
-                opacity: 0;
-                transform: translate(-50%, -15px) scale(1);
-            }
-        }
-
-        /* * --- KEYFRAMES GLOW BERDETAK (MODIFIKASI: Terang dan Jarang) ---
-         */
-        @keyframes pulseGlow {
-            0%, 10%, 100% { 
-                /* Cahaya hampir mati */
-                box-shadow: 0 0 0 transparent;
-            }
-            5% { 
-                /* Puncak Detak Cahaya yang sangat singkat dan intensif */
-                box-shadow: 
-                    0 0 15px var(--glow-color), 
-                    0 0 30px var(--glow-color),
-                    0 0 50px var(--glow-color); 
-            }
-        }
+        /* Keyframes Rotasi Dihapus */
 
     </style>
 </head>
@@ -217,12 +121,10 @@
     <div class="background-light"></div> 
     
     <div class="welcome-area">
-        <div class="profile-pic-wrapper">
+        <div class="logo-wrapper">
             <img src="logo.png" alt="Logo Digital" class="profile-pic">
         </div>
     </div>
-
-    <div class="welcome-toast">WELCOME BACK AJI</div>
     
 </body>
 </html>
