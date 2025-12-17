@@ -24,6 +24,20 @@
         font-weight: 900;
         letter-spacing: 5px;
 
+        color: #555555; 
+        -webkit-text-fill-color: #555555; 
+        
+        background: transparent; 
+        -webkit-background-clip: unset;
+
+        text-shadow: none;
+
+        animation: 
+            turnOn 0.5s steps(10) forwards, 
+            gradientMove 10s ease infinite 0.5s; 
+    }
+
+    .velion-text.on {
         background: linear-gradient(
             270deg,
             #00c6ff,
@@ -39,8 +53,46 @@
         text-shadow:
             0 0 10px rgba(0, 198, 255, 0.7),
             0 0 20px rgba(0, 255, 126, 0.5);
+    }
 
-        animation: gradientMove 6s ease infinite;
+
+    @keyframes turnOn {
+        0% { color: #555555; -webkit-text-fill-color: #555555; text-shadow: none; }
+        10% { color: #aaaaaa; -webkit-text-fill-color: #aaaaaa; text-shadow: none; }
+        20% { color: #555555; -webkit-text-fill-color: #555555; text-shadow: none; }
+        30% { color: #dddddd; -webkit-text-fill-color: #dddddd; text-shadow: none; }
+        40% { color: #555555; -webkit-text-fill-color: #555555; text-shadow: none; }
+        50% { color: #ffffff; -webkit-text-fill-color: #ffffff; text-shadow: none; }
+        55% { 
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+            background: linear-gradient(270deg, #00c6ff, #00ff7e);
+            background-size: 600% 600%;
+            -webkit-background-clip: text;
+            text-shadow: 0 0 5px rgba(0, 198, 255, 0.5);
+        }
+        60% { 
+            color: #555555; 
+            -webkit-text-fill-color: #555555; 
+            text-shadow: none; 
+            background: transparent;
+            -webkit-background-clip: unset;
+        }
+        100% {
+            background: linear-gradient(
+                270deg,
+                #00c6ff,
+                #00ff7e,
+                #00ffd5,
+                #00c6ff
+            );
+            background-size: 600% 600%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow:
+                0 0 10px rgba(0, 198, 255, 0.7),
+                0 0 20px rgba(0, 255, 126, 0.5);
+        }
     }
 
     @keyframes gradientMove {
