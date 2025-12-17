@@ -3,171 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <title>VΞLION System Access</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     
     <style>
         :root {
-            --bg-dark: #1C1C28; 
-            --terminal-border: #3A3A4A; 
-            --text-main: #C9D1D9; 
-            --text-prompt: #8B949E; 
-            --neon-success: #4CAF50; 
-            --neon-error: #FF6B6B; 
-            --neon-title: #7986CB; 
-            --neon-highlight: #74D4FF; 
-            --font-main: 'Fira Code', monospace; 
+            --gradient-start: #00FFC2; 
+            --gradient-end: #0088FF;   
+            --primary-gradient: linear-gradient(90deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+            
+            --secondary-color: #FF6B6B; 
+            --background-color: #121212; 
+            --text-color: #e0e0e0; 
+            --modal-background: #1e1e1e; 
+            --input-background: #2c2c2c;
+            --input-border: #444444;
+            --shadow-color: rgba(0, 0, 0, 0.7); 
+            --success-text: #66bb6a;
+            --error-text: #ef5350;
+            --loading-color: var(--gradient-end); 
+            
+            --toast-bg-success: #1e3a24; 
+            --toast-bg-error: #3a1e1e; 
+            --toast-border-success: var(--success-text);
+            --toast-border-error: var(--error-text);
         }
         
         body {
-            font-family: var(--font-main);
+            font-family: 'Poppins', sans-serif;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
+            background-color: var(--background-color);
+            color: var(--text-color);
             overflow: hidden; 
-            font-size: 16px; 
         }
         
-        .terminal-container {
-            width: 90%;
-            max-width: 750px; 
-            padding: 30px; 
-            background-color: #242436; 
-            border: 1px solid var(--terminal-border);
-            border-radius: 8px; 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), 0 0 5px rgba(121, 134, 203, 0.2); 
-            text-align: left;
+        .title-display {
+            font-size: 10rem; 
+            font-weight: 900; 
+            letter-spacing: -5px;
+            cursor: pointer; 
+            transition: opacity 0.3s;
+            
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(0, 255, 194, 0.4), 0 0 30px rgba(0, 136, 255, 0.2);
+            animation: pulse 5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            100% { opacity: 1.0; }
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); 
+            display: none; 
+            justify-content: center; align-items: center;
+            z-index: 1000; 
             opacity: 0; 
-            animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
-            transition: box-shadow 0.3s ease;
+            pointer-events: auto; 
         }
 
-        .terminal-container:hover {
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7), 0 0 10px rgba(121, 134, 203, 0.4);
+        .modal-overlay.active { 
+            display: flex; 
+            opacity: 1; 
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); } 
-            to { opacity: 1; transform: scale(1); } 
-        }
-
-        .output-history {
-            min-height: 50px;
-            max-height: 70vh;
-            overflow-y: auto; 
-            font-size: 1rem;
-            line-height: 1.6;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            white-space: pre-wrap; 
+        .modal-content {
+            background-color: var(--modal-background); padding: 30px; border-radius: 10px; width: 300px;
+            box-shadow: 0 0 25px var(--shadow-color), 0 0 10px var(--gradient-start);
+            position: relative; 
+            pointer-events: auto; 
+            
+            opacity: 1;
+            transform: scale(1) translateY(0); 
+            transition: none; 
         }
         
-        .output-history::-webkit-scrollbar {
-            width: 8px;
-        }
-        .output-history::-webkit-scrollbar-thumb {
-            background-color: var(--terminal-border);
-            border-radius: 10px;
-        }
-        .output-history::-webkit-scrollbar-track {
-            background-color: var(--bg-dark);
+        .modal-overlay.active .modal-content { 
+            opacity: 1;
+            transform: scale(1) translateY(0);
         }
 
-        .prompt-line {
-            display: flex;
-            gap: 10px;
-            font-size: 1.1rem;
-            color: var(--text-prompt);
-            margin-top: 5px;
+        .welcome-text {
+            font-family: 'Roboto', sans-serif;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .prompt-symbol {
-            font-weight: bold;
-            color: var(--neon-highlight); 
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group input {
+            width: 100%; padding: 12px; background-color: var(--input-background); color: var(--text-color);
+            border: 1px solid var(--input-border); border-radius: 6px; box-sizing: border-box; 
+            font-size: 16px; transition: border-color 0.3s;
         }
-
-        .cursor {
-            display: inline-block;
-            width: 8px; 
-            height: 1.2em;
-            background-color: var(--neon-highlight); 
-            animation: blink 0.8s step-start infinite; 
-            margin-left: 2px;
-            vertical-align: middle;
-            border-radius: 1px;
-        }
-
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
-
-        .hidden-input {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%;
-            height: 100%;
-            opacity: 0; 
-            z-index: -1; 
+        .input-group input:focus {
+            border-color: var(--gradient-end); 
+            outline: none; 
+            box-shadow: 0 0 0 2px rgba(0, 136, 255, 0.3);
         }
         
-        .message-success { color: var(--neon-success); }
-        .message-error { color: var(--neon-error); }
-        .message-secondary { color: var(--text-prompt); }
-        .message-title { 
-            color: var(--neon-title); 
-            font-weight: bold; 
-            text-shadow: 0 0 5px rgba(121, 134, 203, 0.5); 
-            margin-top: 10px;
-            margin-bottom: 5px;
+        button {
+            width: 100%; padding: 12px; 
+            background: var(--primary-gradient); 
+            color: var(--background-color); 
+            border: none; border-radius: 6px; font-size: 18px; cursor: pointer; font-weight: 700;
+            transition: opacity 0.3s, transform 0.1s;
         }
-        
-        .typing {
-            overflow: hidden; 
-            white-space: nowrap; 
-            width: 0; 
-            border-right: none; 
-            animation: typing 1.5s steps(30, end) forwards;
+        button:hover { opacity: 0.9; }
+
+        #loadingModal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(30, 30, 30, 0.95); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; border-radius: 10px; opacity: 0;
+            pointer-events: none; transition: opacity 0.3s;
         }
-        
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
+        #loadingModal.active { opacity: 1; pointer-events: auto; }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2); 
+            border-top: 4px solid var(--loading-color); 
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loadingText { 
+            margin-top: 15px; 
+            color: var(--loading-color); 
+            font-family: 'Roboto', sans-serif; font-weight: 700; 
+            text-shadow: 0 0 5px rgba(116, 212, 255, 0.5); 
+        }
+
+        #toastContainer {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1001; pointer-events: none;
+        }
+        .toast {
+            min-width: 250px; max-width: 90vw; padding: 15px 20px; border-radius: 8px; font-family: 'Roboto', sans-serif;
+            font-size: 1rem; opacity: 0; visibility: hidden; transition: opacity 0.4s, bottom 0.4s; position: relative;
+            bottom: -50px; 
+        }
+        .toast.show { opacity: 1; visibility: visible; bottom: 0; }
+        .toast-success {
+            background-color: var(--toast-bg-success); color: var(--success-text); border: 1px solid var(--toast-border-success);
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        .toast-error {
+            background-color: var(--toast-bg-error); color: var(--error-text); border: 1px solid var(--toast-border-error);
+            box-shadow: 0 4px 15px rgba(239, 83, 80, 0.3);
         }
     </style>
 </head>
 <body>
 
-    <div class="terminal-container" id="terminalContainer">
-        
-        <div class="output-history" id="output">
-            </div>
+    <div class="title-display" id="titleDisplay">VΞLION</div>
 
-        <div class="prompt-line">
-            <span class="prompt-symbol" id="promptSymbol">ACCESS_01 $</span>
-            <div id="inputDisplay">
-                <span id="maskedInput"></span><span id="cursor" class="cursor"></span>
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-content" id="modalContent">
+            
+            <h3 class="welcome-text">WELCOME</h3>
+            
+            <div class="input-group">
+                <input 
+                    type="password" 
+                    id="passwordInput" 
+                    placeholder="Masukkan Sandi Akses" 
+                    autocomplete="off" 
+                    required
+                >
+            </div>
+            
+            <button id="loginButton">Masuk</button>
+            
+            <div id="loadingModal">
+                <div class="spinner"></div>
+                <div id="loadingText">Verifikasi Kunci...</div>
             </div>
         </div>
-
-        <input 
-            type="password" 
-            id="passwordInput" 
-            class="hidden-input"
-            autofocus
-            autocomplete="off"
-            autocorrect="off"
-            spellcheck="false"
-        >
     </div>
+    
+    <div id="toastContainer"></div>
     
     <script>
         const firebaseConfig = {
@@ -184,55 +214,17 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        const input = document.getElementById('passwordInput');
-        const output = document.getElementById('output');
-        const maskedInput = document.getElementById('maskedInput');
-        const promptSymbol = document.getElementById('promptSymbol');
-        const terminalContainer = document.getElementById('terminalContainer');
+        const titleDisplay = document.getElementById('titleDisplay');
+        const passwordModal = document.getElementById('passwordModal');
+        const modalContent = document.getElementById('modalContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginButton = document.getElementById('loginButton');
+        const loadingModal = document.getElementById('loadingModal');
+        const toastContainer = document.getElementById('toastContainer');
         const REDIRECT_URL = 'beranda.html'; 
-
+        const TOAST_DURATION = 3000; 
         let storedHash = null; 
-        let isAuthenticating = false;
-        let currentStage = 1; 
-        const MAX_FAKE_STAGES = 3; 
-        
-        const FULL_INIT_LOG = [
-            { type: 'title', response: ">>> ACCESS CONTROL PROTOCOL V4.1 INITIATED" },
-            { type: 'secondary', response: "--------------------------------------------------------" },
-            
-            
-            { type: 'title', response: "PHASE 1: SYSTEM CORE INITIALIZATION" },
-            { type: 'secondary', response: " -> Initializing Secure Firmware (v4.1.2)... [OK]" },
-            { type: 'secondary', response: " -> Scanning Hardware: Temp(34°C). Drive(Online). SecureMode(Active)." },
-            { type: 'success', response: " -> Loading Critical Modules: [Network_S], [Enc_256], [Task_Mgr]." },
-            
-            { type: 'title', response: "PHASE 2: NETWORK & DATA PROTOCOL CHECK" },
-            { type: 'secondary', response: " -> Checking network latency to Primary Server (5ms)." },
-            { type: 'success', response: " -> Secure channel established (TLS 1.3/AES-256)." },
-            { type: 'secondary', response: " -> Preparing key buffer for next stage." },
-            
-            { type: 'title', response: "PHASE 3: LOCAL CACHE VERIFICATION" },
-            { type: 'secondary', response: " -> Verifying credentials against local encrypted cache..." },
-            { type: 'error', response: " -> Cache integrity check FAILED (0xCD12). Forcing manual input." },
-            { type: 'error', response: " -> WARNING: Manual input required. Proceed to next stage." },
-            { type: 'success', response: " -> System ready. Proceed to **STAGE-4**." },
-        ];
-        
-        const FAILURE_LOG = [
-            { type: 'title', response: "!!! AUTHENTICATION FAILURE ALERT !!!" },
-            { type: 'error', response: " -> Key rejected. Invalid sequence or hash mismatch." },
-            { type: 'secondary', response: " -> Running emergency diagnostics and key reinitialization..." },
-            { type: 'secondary', response: " -> Integrity check: PASS. Attempt logged." },
-            { type: 'error', response: " -> Input buffer cleared. Awaiting new Final Key." },
-        ];
-
-        const LOG_BREAKPOINTS = [6, 10, 15]; 
-
-        const DISPLAY_CODES = [
-            "LOAD_MODULE", "CHECK_INIT", "VERIFY_CERT", "SET_FLAG", 
-            "CALC_SUM", "EXEC_PROC", "DECRYPT_KEY", "NETWORK_PING",
-            "SYNC_TIME", "READ_BUFFER", "FINAL_AUTH", "GET_HASH",
-        ];
+        let isModalOpen = false;
 
         async function sha256Hex(str) {
             const enc = new TextEncoder().encode(str);
@@ -240,79 +232,58 @@
             return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        function appendLogLine(responseText, className = '') {
-            const responseLine = document.createElement('div');
-            responseLine.textContent = responseText;
-            responseLine.className = className;
-            output.appendChild(responseLine);
-            output.scrollTop = output.scrollHeight; 
-        }
-
-        function appendTypingLine(responseText, className = '') {
-            const responseLine = document.createElement('div');
-            responseLine.innerHTML = `<span class="typing">${responseText}</span>`;
-            responseLine.className = className;
-            output.appendChild(responseLine);
-            output.scrollTop = output.scrollHeight; 
+        function showToast(text, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = text;
+            toast.className = `toast ${isError ? 'toast-error' : 'toast-success'}`;
+            
+            toastContainer.appendChild(toast);
             
             setTimeout(() => {
-                const typingSpan = responseLine.querySelector('.typing');
-                if (typingSpan) {
-                    typingSpan.style.width = 'auto'; 
-                }
-            }, 1500); 
+                toast.classList.add('show');
+            }, 10); 
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toastContainer.removeChild(toast);
+                }, 500); 
+            }, TOAST_DURATION);
         }
 
-        function appendPromptToHistory(promptText) {
-            const promptLine = document.createElement('div');
-            promptLine.textContent = `${promptSymbol.textContent} ${promptText}`;
-            promptLine.className = 'message-secondary';
-            output.appendChild(promptLine);
-            output.scrollTop = output.scrollHeight; 
+        function handleAuthResult(text, isError = false) {
+            loadingModal.classList.remove('active'); 
+            
+            showToast(text, isError);
+
+            if (isError) {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Masuk';
+                setTimeout(() => { 
+                    passwordInput.focus();
+                    passwordInput.value = ''; 
+                }, TOAST_DURATION);
+            }
         }
         
-        function updateMaskedInput(realValue) {
-            const length = realValue.length;
-            let displayedCode = "";
-            
-            for (let i = 0; i < length; i++) {
-                displayedCode += DISPLAY_CODES[i % DISPLAY_CODES.length] + ' ';
-            }
-            
-            maskedInput.textContent = displayedCode.trim();
-        }
-
-        async function runStageLog(logArray, onCompleteCallback) {
-            isAuthenticating = true; 
-            let delay = 70; 
-            
-            for (let i = 0; i < logArray.length; i++) {
-                setTimeout(() => {
-                    const log = logArray[i];
-                    appendLogLine(log.response, `message-${log.type}`);
-                    
-                    if (i === logArray.length - 1) {
-                        onCompleteCallback();
-                    }
-                }, delay * i); 
+        function openModal() {
+            if (storedHash) {
+                passwordModal.classList.add('active');
+                isModalOpen = true;
+                setTimeout(() => passwordInput.focus(), 50); 
+            } else {
+                showToast("Sistem belum siap. Gagal memuat hash sandi.", true);
             }
         }
 
-        function welcomeSequence() {
-            setTimeout(() => {
-                appendTypingLine(FULL_INIT_LOG[0].response, `message-${FULL_INIT_LOG[0].type}`); 
-                
-                setTimeout(() => {
-                    appendLogLine(FULL_INIT_LOG[1].response, `message-${FULL_INIT_LOG[1].type}`);
-                    
-                    setTimeout(() => {
-                        appendTypingLine("System Ready. Press ENTER to begin **STAGE 1**.", 'message-success');
-                        isAuthenticating = false;
-                        input.focus(); 
-                    }, 500); 
-                }, 1600); 
-
-            }, 1000); 
+        function closeModal() {
+            passwordModal.classList.remove('active');
+            loadingModal.classList.remove('active'); 
+            isModalOpen = false;
+            passwordInput.value = ''; 
+            loginButton.disabled = false;
+            loginButton.textContent = 'Masuk';
+            document.body.focus(); 
         }
 
         async function preloadPasswordHash() {
@@ -321,92 +292,80 @@
                 storedHash = snapshot.val();
 
                 if (!storedHash) {
-                    appendLogLine("FATAL ERROR: Failed to retrieve hash.", 'message-error');
-                } else {
-                    welcomeSequence();
+                    showToast("ERROR: Gagal memuat data kunci.", true);
                 }
 
             } catch (error) {
                 console.error('Error saat memuat sandi:', error);
-                appendLogLine("FATAL ERROR: Network connection failed.", 'message-error');
+                showToast("FATAL ERROR: Koneksi jaringan gagal.", true);
             }
         }
 
-        input.addEventListener('input', () => {
-            updateMaskedInput(input.value); 
-        });
-        
-        input.addEventListener('keydown', async (event) => {
-            if (event.key !== 'Enter' || isAuthenticating) return;
+        async function handleLogin() {
+            const password = passwordInput.value.trim();
             
-            event.preventDefault();
-            
-            const enteredText = input.value.trim();
-            const displayedText = maskedInput.textContent;
-            
-            appendPromptToHistory(displayedText || (currentStage <= MAX_FAKE_STAGES ? 'INIT_EXECUTE' : 'ENTER_KEY'));
+            if (!password) {
+                showToast("Sandi akses diperlukan.", true);
+                return;
+            }
 
-            input.value = '';
-            updateMaskedInput('');
+            if (!storedHash) {
+                showToast("Sistem belum siap. Coba buka ulang modal.", true);
+                return;
+            }
 
-            if (currentStage <= MAX_FAKE_STAGES) {
+            loadingModal.classList.add('active');
+            loginButton.disabled = true;
+
+            const inputHash = await sha256Hex(password);
+            
+            await new Promise(resolve => setTimeout(resolve, 800)); 
+            
+            if (inputHash === storedHash) {
                 
-                const currentLogIndex = currentStage === 1 ? 2 : LOG_BREAKPOINTS[currentStage - 2];
-                const nextLogIndex = LOG_BREAKPOINTS[currentStage - 1];
-                
-                const stageLog = FULL_INIT_LOG.slice(currentLogIndex, nextLogIndex);
-
-                runStageLog(stageLog, () => {
-                    currentStage++; 
-                    if (currentStage <= MAX_FAKE_STAGES) {
-                        promptSymbol.textContent = `ACCESS_0${currentStage} $`;
-                        appendLogLine(`System Ready. Press ENTER to begin **STAGE ${currentStage}** command input.`, 'message-success');
-                    } else {
-                        promptSymbol.textContent = 'AUTH_FINAL $'; 
-                        appendLogLine("Access Control Activated. Enter **FINAL KEY**.", 'message-title');
-                    }
-                    isAuthenticating = false; 
-                    input.focus();
-                });
+                handleAuthResult('Akses Diberikan. Mengalihkan...', false);
+                setTimeout(() => {
+                    window.location.href = REDIRECT_URL;
+                }, 1000 + TOAST_DURATION); 
 
             } else {
                 
-                if (enteredText.length === 0) {
-                    appendLogLine("ERROR: Final Access Key is required.", 'message-error');
-                    isAuthenticating = false;
-                    input.focus();
-                    return;
-                }
+                handleAuthResult('Kata Sandi salah.', true);
+            }
+        }
 
-                isAuthenticating = true;
-                appendLogLine("Executing Final Authentication (SHA-256)...", 'message-secondary');
-                
-                const inputHash = await sha256Hex(enteredText);
-                
-                if (inputHash === storedHash) {
-                    
-                    appendLogLine('ACCESS GRANTED. Redirecting to secured environment...', 'message-success');
-                    setTimeout(() => {
-                        window.location.href = REDIRECT_URL;
-                    }, 1000); 
+        titleDisplay.addEventListener('click', () => {
+            if (!isModalOpen) {
+                openModal();
+            }
+        });
 
+        passwordModal.addEventListener('click', (event) => {
+            if (event.target === passwordModal) {
+                closeModal();
+            }
+        });
+
+        loginButton.addEventListener('click', handleLogin);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                if (!isModalOpen) {
+                    openModal();
                 } else {
-                    
-                    runStageLog(FAILURE_LOG, () => {
-                        promptSymbol.textContent = 'AUTH_FINAL $'; 
-                        isAuthenticating = false; 
-                        input.focus();
-                    });
+                    handleLogin();
+                }
+                event.preventDefault(); 
+            } else if (event.key === 'Escape') {
+                if (isModalOpen) {
+                    closeModal();
                 }
             }
         });
 
         document.addEventListener('DOMContentLoaded', () => {
             preloadPasswordHash(); 
-            
-            document.addEventListener('click', () => {
-                input.focus();
-            });
+            document.body.focus(); 
         });
     </script>
 
