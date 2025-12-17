@@ -1,130 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Logo Animasi Garis Solid (Masuk Instan)</title>
-    <style>
-        /* * --- Variabel --- */
-        :root {
-            --dark-bg: #030408; 
-            --outline-color: #f3f4f6;
-            --outline-width: 3px;     
-            --circle-size: 250px; 
-            --entrance-duration: 1.5s; 
-            --entrance-curve: cubic-bezier(0.23, 1, 0.32, 1); 
-            --glow-color: #00eaff; 
-            --entrance-delay: 0.5s; 
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VΞLION</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap" rel="stylesheet">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<link rel="icon" type="image/png" href="logo.png">
 
-        body {
-            background-color: var(--dark-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #121212;
+    }
 
-        .background-light {
-            position: absolute;
-            width: 50vw; 
-            height: 50vw;
-            background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
-            opacity: 0.15; 
-            pointer-events: none;
-            z-index: 5; 
-            
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); 
-            animation: lightMove 25s ease-in-out infinite alternate; 
-        }
+    .velion-text {
+        font-family: 'Poppins', sans-serif;
+        font-size: 12vw;
+        font-weight: 900;
+        letter-spacing: 5px;
 
-        .welcome-area {
-            text-align: center;
-            z-index: 10;
-            opacity: 0;
-            transform: scale(0.8);
-            animation: areaEntrance var(--entrance-duration) var(--entrance-curve) forwards; 
-        }
+        background: linear-gradient(
+            270deg,
+            #00c6ff,
+            #00ff7e,
+            #00ffd5,
+            #00c6ff
+        );
+        background-size: 600% 600%;
 
-        /* * --- Wrapper Lingkaran (GARIS SOLID TUNGGAL) --- */
-        /* Mengganti nama dari profile-pic-wrapper menjadi logo-wrapper untuk simplifikasi */
-        .logo-wrapper {
-            width: var(--circle-size); 
-            height: var(--circle-size);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            
-            background-color: transparent; 
-            /* Garis Solid */
-            border: var(--outline-width) solid var(--outline-color); 
-            overflow: hidden; 
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
 
-            opacity: 0;
-            transform: scale(0.5);
-            
-            /* Hanya sisa animasi Entrance (profileEntrance) */
-            animation: 
-                profileEntrance 1.2s var(--entrance-curve) forwards var(--entrance-delay);
-            
-            filter: none; 
-        }
+        text-shadow:
+            0 0 10px rgba(0, 198, 255, 0.7),
+            0 0 20px rgba(0, 255, 126, 0.5);
 
-        /* * --- Gambar Logo (Muncul Instan) --- */
-        .profile-pic {
-            width: 100%; 
-            height: 100%;
-            border-radius: 50%; 
-            object-fit: cover;
-            display: block;
-            
-            /* Langsung terlihat */
-            opacity: 1; 
-            animation: none;
-        }
+        animation: gradientMove 6s ease infinite;
+    }
 
-        /* * --- Keyframes Animasi --- */
-        
-        @keyframes areaEntrance {
-            to { opacity: 1; transform: scale(1); }
+    @keyframes gradientMove {
+        0% {
+            background-position: 0% 50%;
         }
-
-        @keyframes profileEntrance {
-            to { opacity: 1; transform: scale(1); }
+        50% {
+            background-position: 100% 50%;
         }
-        
-        @keyframes lightMove {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-            }
-            100% {
-                transform: translate(-55%, -45%) scale(1.1);
-            }
+        100% {
+            background-position: 0% 50%;
         }
-        
-        /* Keyframes Rotasi Dihapus */
-
-    </style>
+    }
+</style>
 </head>
+
 <body>
-    <div class="background-light"></div> 
-    
-    <div class="welcome-area">
-        <div class="logo-wrapper">
-            <img src="logo.png" alt="Logo Digital" class="profile-pic">
-        </div>
-    </div>
-    
+    <div class="velion-text">VΞLION</div>
 </body>
 </html>
