@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VΞLION System Access</title>
+    <title>VΞLION</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
@@ -50,14 +50,16 @@
             font-size: 10rem; 
             font-weight: 900; 
             letter-spacing: -5px;
-            cursor: pointer; 
             transition: opacity 0.3s;
+            cursor: pointer;
             
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(0, 255, 194, 0.4), 0 0 30px rgba(0, 136, 255, 0.2);
-            animation: pulse 5s infinite alternate;
+            color: #555555;
+            background: none;
+            -webkit-background-clip: unset;
+            -webkit-text-fill-color: #555555;
+            text-shadow: none;
+            opacity: 0.7;
+            animation: none;
         }
 
         @keyframes pulse {
@@ -267,12 +269,10 @@
         }
         
         function openModal() {
-            if (storedHash) {
+            if (storedHash || storedHash === null) {
                 passwordModal.classList.add('active');
                 isModalOpen = true;
                 setTimeout(() => passwordInput.focus(), 50); 
-            } else {
-                showToast("Sistem belum siap. Gagal memuat hash sandi.", true);
             }
         }
 
@@ -290,14 +290,10 @@
             try {
                 const snapshot = await db.ref('real/passwordHash').once('value');
                 storedHash = snapshot.val();
-
-                if (!storedHash) {
-                    showToast("ERROR: Gagal memuat data kunci.", true);
-                }
-
             } catch (error) {
                 console.error('Error saat memuat sandi:', error);
                 showToast("FATAL ERROR: Koneksi jaringan gagal.", true);
+                storedHash = false;
             }
         }
 
@@ -310,7 +306,7 @@
             }
 
             if (!storedHash) {
-                showToast("Sistem belum siap. Coba buka ulang modal.", true);
+                showToast("FATAL ERROR: Sistem tidak dapat memuat kunci.", true);
                 return;
             }
 
@@ -324,16 +320,14 @@
             if (inputHash === storedHash) {
                 
                 handleAuthResult('Akses Diberikan. Mengalihkan...', false);
-                setTimeout(() => {
-                    window.location.href = REDIRECT_URL;
-                }, 1000 + TOAST_DURATION); 
+                window.location.href = REDIRECT_URL;
 
             } else {
                 
                 handleAuthResult('Kata Sandi salah.', true);
             }
         }
-
+        
         titleDisplay.addEventListener('click', () => {
             if (!isModalOpen) {
                 openModal();
@@ -363,8 +357,8 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            preloadPasswordHash(); 
+        document.addEventListener('DOMContentLoaded', async () => {
+            await preloadPasswordHash(); 
             document.body.focus(); 
         });
     </script>
